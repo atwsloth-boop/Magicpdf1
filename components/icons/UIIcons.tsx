@@ -3,12 +3,23 @@ import React from 'react';
 
 export const LogoIcon: React.FC<{ className?: string }> = (props) => (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-      <path d="M14 2v6h6" />
-      <path d="M10.125 14.625 12 12.75l1.875 1.875" />
-      <path d="M12.002 12.75 13.877 11l-1.875-1.875" />
-      <path d="M12 18.25V12.75" />
-      <path d="M13.875 14.625 12 16.5l-1.875-1.875" />
+      <defs>
+        <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{ stopColor: 'rgb(0, 255, 255)', stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: 'rgb(0, 150, 255)', stopOpacity: 1 }} />
+        </linearGradient>
+      </defs>
+      {/* Document shape */}
+      <path stroke="url(#logo-gradient)" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline stroke="url(#logo-gradient)" points="14 2 14 8 20 8" />
+      
+      {/* Sparkle inside */}
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M12 12v6" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M9 15h6" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M10.5 13.5 9 12" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M13.5 13.5 15 12" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M10.5 16.5 9 18" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M13.5 16.5 15 18" />
     </svg>
 );
 

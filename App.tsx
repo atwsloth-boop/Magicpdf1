@@ -31,11 +31,11 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-700">
+    <div className="min-h-screen flex flex-col bg-gray-900 text-gray-300">
       <Header onMenuClick={toggleSidebar} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar isOpen={isSidebarOpen} onToggle={toggleSidebar} onSelectTool={handleSelectTool} />
-        <div className="flex-1 flex flex-col overflow-y-auto">
+        <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
           <MainContent onSelectTool={handleSelectTool}/>
           <Footer />
         </div>
