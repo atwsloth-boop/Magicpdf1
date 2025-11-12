@@ -9,6 +9,7 @@ declare const JSZip: any;
 declare const mammoth: any;
 declare const jspdf: any;
 declare const html2canvas: any;
+declare const pdfjsLib: any;
 
 // Fix: Add type definitions for the browser's SpeechRecognition API to resolve compilation errors.
 interface SpeechRecognitionEvent {
@@ -135,13 +136,13 @@ const FileDropZone: React.FC = () => {
 
 // Specific Tool Components
 
-const ProcessingAnimation: React.FC = () => (
+const ProcessingAnimation: React.FC<{ text?: string }> = ({ text = "Processing your documents..." }) => (
     <div className="flex flex-col items-center justify-center gap-4 text-center">
         <div className="relative h-24 w-24">
             <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-t-blue-600 rounded-full animate-spin"></div>
         </div>
-        <p className="text-lg font-semibold text-gray-700">Processing your documents...</p>
+        <p className="text-lg font-semibold text-gray-700">{text}</p>
         <p className="text-sm text-gray-500">Please wait a moment.</p>
     </div>
 );
@@ -764,6 +765,320 @@ const WordToPdfTool: React.FC = () => {
     );
 };
 
+const EditPdfTool: React.FC = () => {
+    // Tool state
+    const [file, setFile] = useState<File | null>(null);
+    const [totalPages, setTotalPages] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pdfDoc, setPdfDoc] = useState<any>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Editing state
+    type ActiveTool = 'select' | 'text' | 'image' | 'draw';
+    type Edit = TextEdit | ImageEdit | DrawingEdit;
+    
+    interface BaseEdit { id: string; page: number; }
+    interface TextEdit extends BaseEdit { type: 'text'; x: number; y: number; text: string; fontSize: number; font: string; color: string; }
+    interface ImageEdit extends BaseEdit { type: 'image'; x: number; y: number; width: number; height: number; imageBytes: ArrayBuffer; mimeType: 'image/png' | 'image/jpeg'; }
+    interface DrawingEdit extends BaseEdit { type: 'drawing'; path: string; color: string; strokeWidth: number; }
+    
+    const [activeTool, setActiveTool] = useState<ActiveTool>('select');
+    const [edits, setEdits] = useState<Edit[]>([]);
+    const [isDrawing, setIsDrawing] = useState(false);
+    
+    // Toolbar options state
+    const [textColor, setTextColor] = useState('#000000');
+    const [fontSize, setFontSize] = useState(16);
+    const [font, setFont] = useState('Helvetica');
+    const [drawColor, setDrawColor] = useState('#ff0000');
+    const [strokeWidth, setStrokeWidth] = useState(2);
+
+    // Refs
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const editorWrapperRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Setup pdf.js worker
+    useEffect(() => {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
+    }, []);
+
+    const renderPage = useCallback(async (pageNum: number) => {
+        if (!pdfDoc) return;
+        const page = await pdfDoc.getPage(pageNum);
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const viewport = page.getViewport({ scale: 1.5 });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        const context = canvas.getContext('2d');
+        if (!context) return;
+
+        await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+        // Draw existing edits on top
+        const pageEdits = edits.filter(e => e.page === pageNum);
+        pageEdits.forEach(edit => {
+            if (edit.type === 'text') {
+                context.fillStyle = edit.color;
+                context.font = `${edit.fontSize}px ${edit.font}`;
+                context.fillText(edit.text, edit.x, edit.y);
+            } else if (edit.type === 'drawing') {
+                context.strokeStyle = edit.color;
+                context.lineWidth = edit.strokeWidth;
+                context.lineCap = 'round';
+                context.lineJoin = 'round';
+                const p = new Path2D(edit.path);
+                context.stroke(p);
+            } else if (edit.type === 'image') {
+                const img = new Image();
+                const blob = new Blob([edit.imageBytes], { type: edit.mimeType });
+                img.src = URL.createObjectURL(blob);
+                img.onload = () => {
+                    context.drawImage(img, edit.x, edit.y, edit.width, edit.height);
+                    URL.revokeObjectURL(img.src);
+                };
+            }
+        });
+
+    }, [pdfDoc, edits]);
+    
+    useEffect(() => {
+        renderPage(currentPage);
+    }, [currentPage, pdfDoc, edits, renderPage]);
+
+    const handleFileSelect = async (selectedFile: File | null) => {
+        if (!selectedFile) return;
+        if (selectedFile.type !== 'application/pdf') {
+            setError('Please select a valid PDF file.');
+            return;
+        }
+        setFile(selectedFile);
+        setError(null);
+        setIsProcessing(true);
+        try {
+            const arrayBuffer = await selectedFile.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
+            setPdfDoc(pdf);
+            setTotalPages(pdf.numPages);
+            setCurrentPage(1);
+        } catch (e) {
+            setError('Failed to load PDF.');
+            console.error(e);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+    
+    const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (activeTool === 'text') {
+            const rect = canvasRef.current!.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const text = prompt('Enter text:');
+            if (text) {
+                setEdits([...edits, { id: Date.now().toString(), type: 'text', page: currentPage, x, y, text, color: textColor, fontSize, font }]);
+            }
+        }
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const imgFile = e.target.files?.[0];
+        if (!imgFile || !['image/png', 'image/jpeg'].includes(imgFile.type)) {
+            alert('Please select a PNG or JPG image.');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const imageBytes = event.target?.result as ArrayBuffer;
+            if(imageBytes) {
+                // For simplicity, place image at a default position
+                setEdits([...edits, { id: Date.now().toString(), type: 'image', page: currentPage, x: 50, y: 50, width: 200, height: 150, imageBytes, mimeType: imgFile.type as 'image/png' | 'image/jpeg' }]);
+            }
+        };
+        reader.readAsArrayBuffer(imgFile);
+        setActiveTool('select');
+    };
+
+    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (activeTool !== 'draw') return;
+        const rect = canvasRef.current!.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const newPath = `M${x} ${y}`;
+        setEdits([...edits, {id: Date.now().toString(), type: 'drawing', page: currentPage, path: newPath, color: drawColor, strokeWidth}]);
+        setIsDrawing(true);
+    };
+
+    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (!isDrawing || activeTool !== 'draw') return;
+        const rect = canvasRef.current!.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const lastEdit = edits[edits.length-1];
+        if(lastEdit.type !== 'drawing') return;
+        
+        lastEdit.path += ` L${x} ${y}`;
+        setEdits([...edits.slice(0, -1), lastEdit]);
+    };
+    
+    const stopDrawing = () => {
+        if (activeTool !== 'draw') return;
+        setIsDrawing(false);
+    };
+
+    const handleSave = async () => {
+        if (!file) return;
+        setIsProcessing(true);
+        try {
+            const { PDFDocument, StandardFonts, rgb, degrees } = PDFLib;
+            const existingPdfBytes = await file.arrayBuffer();
+            const pdfLibDoc = await PDFDocument.load(existingPdfBytes);
+            const fontObjects = {
+                Helvetica: await pdfLibDoc.embedFont(StandardFonts.Helvetica),
+                TimesRoman: await pdfLibDoc.embedFont(StandardFonts.TimesRoman),
+                Courier: await pdfLibDoc.embedFont(StandardFonts.Courier)
+            };
+            const pages = pdfLibDoc.getPages();
+
+            for (const edit of edits) {
+                const page = pages[edit.page - 1];
+                const { width, height } = page.getSize();
+                const canvas = canvasRef.current!;
+                const scaleX = width / canvas.width;
+                const scaleY = height / canvas.height;
+
+                if (edit.type === 'text') {
+                    page.drawText(edit.text, {
+                        x: edit.x * scaleX,
+                        y: height - (edit.y * scaleY),
+                        font: fontObjects[edit.font as keyof typeof fontObjects],
+                        size: edit.fontSize * scaleX,
+                        color: rgb(parseInt(edit.color.slice(1, 3), 16) / 255, parseInt(edit.color.slice(3, 5), 16) / 255, parseInt(edit.color.slice(5, 7), 16) / 255),
+                    });
+                } else if (edit.type === 'image') {
+                    const image = edit.mimeType === 'image/png' ? await pdfLibDoc.embedPng(edit.imageBytes) : await pdfLibDoc.embedJpg(edit.imageBytes);
+                    page.drawImage(image, {
+                        x: edit.x * scaleX,
+                        y: height - (edit.y * scaleY) - (edit.height * scaleY),
+                        width: edit.width * scaleX,
+                        height: edit.height * scaleY,
+                    });
+                } else if (edit.type === 'drawing') {
+                     // Need to scale path coordinates
+                    const scaledPath = edit.path.split(' ').map(part => {
+                        if (part.startsWith('M') || part.startsWith('L')) {
+                            const coords = part.substring(1).split(',').map(Number);
+                            return `${part.charAt(0)}${coords[0] * scaleX},${coords[1] * scaleY}`;
+                        }
+                        const coords = part.split(',').map(Number);
+                        return `${coords[0] * scaleX},${coords[1] * scaleY}`;
+                    }).join(' ');
+                    
+                    // a simple path conversion, this is complex for real-world apps
+                    const pathCommands = edit.path.split(/(?=[ML])/).map(cmd => {
+                        const type = cmd[0];
+                        const [x, y] = cmd.substring(1).trim().split(' ').map(parseFloat);
+                        return { type, x: x * scaleX, y: height - (y * scaleY) };
+                    });
+                    
+                    let svgPath = '';
+                    pathCommands.forEach(p => { svgPath += `${p.type}${p.x} ${p.y} `; });
+                    
+                    page.drawSvgPath(svgPath.trim(), {
+                        borderColor: rgb(parseInt(edit.color.slice(1, 3), 16) / 255, parseInt(edit.color.slice(3, 5), 16) / 255, parseInt(edit.color.slice(5, 7), 16) / 255),
+                        borderWidth: edit.strokeWidth,
+                    });
+                }
+            }
+
+            const pdfBytes = await pdfLibDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name.replace('.pdf', '-edited.pdf');
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        } catch(e) {
+            console.error(e);
+            setError("Failed to save PDF. See console for details.");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+    
+    if (isProcessing && !pdfDoc) return <ProcessingAnimation text="Loading PDF..." />;
+    
+    return (
+        <div className="w-full flex flex-col gap-4">
+            {!file ? (
+                <div onClick={() => fileInputRef.current?.click()} className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 transition-all duration-300 cursor-pointer hover:border-blue-500 hover:bg-blue-50 text-center">
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
+                    <div className="flex flex-col items-center">
+                        <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
+                        <p className="text-gray-700">Click to select a PDF file to edit</p>
+                    </div>
+                </div>
+            ) : (
+                <>
+                {isProcessing && <ProcessingAnimation text="Saving PDF..." />}
+                <div className={`transition-opacity duration-300 ${isProcessing ? 'opacity-20' : 'opacity-100'}`}>
+                    {/* Toolbar */}
+                    <div className="bg-gray-100 border border-gray-200 rounded-lg p-2 mb-4 flex flex-wrap items-center gap-4">
+                        <button onClick={() => setActiveTool('select')} className={`p-2 rounded ${activeTool === 'select' ? 'bg-blue-600 text-white' : 'hover:bg-gray-200'}`}>Select</button>
+                        <button onClick={() => setActiveTool('text')} className={`p-2 rounded ${activeTool === 'text' ? 'bg-blue-600 text-white' : 'hover:bg-gray-200'}`}>Text</button>
+                        <button onClick={() => { setActiveTool('image'); fileInputRef.current?.click(); }} className={`p-2 rounded ${activeTool === 'image' ? 'bg-blue-600 text-white' : 'hover:bg-gray-200'}`}>Image</button>
+                        <input type="file" ref={fileInputRef} className="hidden" accept="image/png, image/jpeg" onChange={handleImageUpload} />
+                        <button onClick={() => setActiveTool('draw')} className={`p-2 rounded ${activeTool === 'draw' ? 'bg-blue-600 text-white' : 'hover:bg-gray-200'}`}>Draw</button>
+                        {activeTool === 'text' && (<>
+                            <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)} />
+                            <input type="number" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value))} className="w-16 p-1 border rounded"/>
+                            <select value={font} onChange={e => setFont(e.target.value)} className="p-1 border rounded">
+                                <option>Helvetica</option>
+                                <option>TimesRoman</option>
+                                <option>Courier</option>
+                            </select>
+                        </>)}
+                        {activeTool === 'draw' && (<>
+                             <input type="color" value={drawColor} onChange={e => setDrawColor(e.target.value)} />
+                            <input type="range" min="1" max="20" value={strokeWidth} onChange={e => setStrokeWidth(parseInt(e.target.value))} />
+                            <span>{strokeWidth}px</span>
+                        </>)}
+                    </div>
+                    {/* Editor */}
+                    <div ref={editorWrapperRef} className="bg-gray-200 p-4 overflow-auto custom-scrollbar flex justify-center">
+                        <canvas ref={canvasRef} className="border border-gray-400 shadow-lg"
+                            onClick={handleCanvasClick}
+                            onMouseDown={startDrawing}
+                            onMouseMove={draw}
+                            onMouseUp={stopDrawing}
+                            onMouseLeave={stopDrawing}
+                        />
+                    </div>
+                    {/* Navigation & Save */}
+                    <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1}>Prev</button>
+                            <span>Page {currentPage} of {totalPages}</span>
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}>Next</button>
+                        </div>
+                        <button onClick={handleSave} className="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">Save & Download PDF</button>
+                    </div>
+                </div>
+                </>
+            )}
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        </div>
+    );
+};
+
 
 const QRGenerator: React.FC = () => {
     const [text, setText] = useState('https://react.dev');
@@ -1009,6 +1324,8 @@ const ToolPage: React.FC<ToolPageProps> = ({ tool }) => {
                 return <CompressPdfTool />;
             case 'word-to-pdf':
                 return <WordToPdfTool />;
+            case 'edit-pdf':
+                return <EditPdfTool />;
             case 'qr-code-generator':
                 return <QRGenerator />;
             case 'word-counter':
@@ -1048,7 +1365,7 @@ const ToolPage: React.FC<ToolPageProps> = ({ tool }) => {
             </header>
 
             {/* Tool Content Area */}
-            <div className="max-w-3xl mx-auto bg-white border border-gray-200 rounded-lg p-6 sm:p-8 shadow-sm">
+            <div className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-lg p-6 sm:p-8 shadow-sm">
                 <div className="flex justify-center">
                     {renderToolContent()}
                 </div>
