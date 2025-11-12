@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Tool } from '../types';
 import { UploadIcon } from './icons/ToolIcons';
@@ -616,9 +615,12 @@ const WordToPdfTool: React.FC = () => {
             // 1. Render docx to the hidden div
             await docx.renderAsync(file, previewRef.current);
 
+            // Wait for a brief moment to ensure the DOM is fully painted, especially if the document contains images.
+            await new Promise(resolve => setTimeout(resolve, 100));
+
             // 2. Use html2pdf to convert the rendered content
             const element = previewRef.current;
-            if (element.innerHTML === '') {
+            if (element.innerHTML.trim() === '') {
                 throw new Error("Failed to render the document. The file might be empty or corrupted.");
             }
             
@@ -652,7 +654,7 @@ const WordToPdfTool: React.FC = () => {
         <div className="w-full text-center flex flex-col gap-4">
             {/* 
               This div is used as a render target for the docx file.
-              It's positioned off-screen instead of using 'display: none' (the 'hidden' class)
+              It's positioned off-screen instead of using 'display: none'
               because html2pdf.js cannot process elements that are not rendered in the DOM.
               A fixed width is also applied to simulate a paper page for better layouting.
             */}
