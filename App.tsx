@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
 import Footer from './components/Footer';
 import ToolPage from './components/ToolPage';
+import AdBanner from './components/AdBanner';
 import { TOOLS } from './constants';
 
 const App: React.FC = () => {
@@ -42,14 +42,20 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-800">
       <Header />
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {activeTool ? (
-          <ToolPage tool={activeTool} />
-        ) : (
-          <MainContent />
-        )}
-        <Footer />
+      <AdBanner placement="header" />
+      <div className="flex-1 flex w-full overflow-hidden">
+        <AdBanner placement="left" />
+        <main className="flex-1 overflow-y-auto custom-scrollbar">
+          {activeTool ? (
+            <ToolPage tool={activeTool} />
+          ) : (
+            <MainContent />
+          )}
+        </main>
+        <AdBanner placement="right" />
       </div>
+      <AdBanner placement="footer" />
+      <Footer />
     </div>
   );
 };
