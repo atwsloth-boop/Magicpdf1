@@ -6,8 +6,9 @@ import { QRCodeSVG } from 'qrcode.react';
 // Inform TypeScript about the global objects from the CDN scripts
 declare const PDFLib: any;
 declare const JSZip: any;
-declare const docx: any;
-declare const html2pdf: any;
+declare const mammoth: any;
+declare const jspdf: any;
+declare const html2canvas: any;
 
 // Fix: Add type definitions for the browser's SpeechRecognition API to resolve compilation errors.
 interface SpeechRecognitionEvent {
@@ -560,28 +561,32 @@ const WordToPdfTool: React.FC = () => {
     const [isConverting, setIsConverting] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [progressMessage, setProgressMessage] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const previewRef = useRef<HTMLDivElement>(null); // Ref for the hidden render target
 
     const handleFileSelect = (selectedFiles: FileList | null) => {
         if (!selectedFiles || selectedFiles.length === 0) return;
         
         const selectedFile = selectedFiles[0];
-        // docx-preview only supports .docx, not .doc
-        const allowedExtensions = ['.docx'];
+        const validTypes = [
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+        const validExtensions = ['.doc', '.docx'];
         const fileExtension = selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase();
 
-        if (allowedExtensions.includes(fileExtension)) {
+        if (validTypes.includes(selectedFile.type) || validExtensions.includes(fileExtension)) {
             setFile(selectedFile);
             setError(null);
         } else {
             setFile(null);
-            setError("Please select a valid Word document (.docx). The .doc format is not supported.");
+            setError("Please select a valid Word document (.doc or .docx).");
         }
     };
 
     const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
+        e.stopPropagation();
         setIsDragOver(false);
         handleFileSelect(e.dataTransfer.files);
     };
@@ -595,92 +600,139 @@ const WordToPdfTool: React.FC = () => {
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
-        if (previewRef.current) {
-            previewRef.current.innerHTML = ''; // Clear preview
-        }
     };
 
-    const handleConvert = async () => {
-        if (!file || !previewRef.current) {
-            setError("Please select a file first.");
+    const handleConvert = useCallback(async () => {
+        if (!file) {
+            setError('Please select a Word file first.');
             return;
         }
+        
         setIsConverting(true);
         setError(null);
-        
-        // Clear previous render
-        previewRef.current.innerHTML = '';
+        let renderContainer: HTMLDivElement | null = null;
 
         try {
-            // 1. Render docx to the hidden div
-            await docx.renderAsync(file, previewRef.current);
+            // 1. Read Word file and convert to HTML using Mammoth.js
+            setProgressMessage('Step 1/4: Reading Word file...');
+            const arrayBuffer = await file.arrayBuffer();
+            // Fix: Use mammoth directly as it is declared globally, not on the window object.
+            const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
 
-            // Wait for a brief moment to ensure the DOM is fully painted, especially if the document contains images.
+            // 2. Create a hidden element to render the HTML for capturing
+            setProgressMessage('Step 2/4: Preparing document for rendering...');
+            renderContainer = document.createElement('div');
+            // Style it for off-screen rendering
+            renderContainer.style.position = 'absolute';
+            renderContainer.style.left = '-9999px';
+            renderContainer.style.width = '794px'; // A4 width at 96 DPI
+            renderContainer.style.padding = '40px';
+            renderContainer.style.backgroundColor = 'white';
+            renderContainer.style.boxSizing = 'border-box';
+            renderContainer.innerHTML = `<div style="color: black; word-wrap: break-word;">${html}</div>`;
+            document.body.appendChild(renderContainer);
+
+            // Give browser a moment to render content, especially images
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            // 2. Use html2pdf to convert the rendered content
-            const element = previewRef.current;
-            if (element.innerHTML.trim() === '') {
-                throw new Error("Failed to render the document. The file might be empty or corrupted.");
+            // 3. Use html2canvas to render the hidden element to a canvas
+            setProgressMessage('Step 3/4: Rendering document to image...');
+            // Fix: Use html2canvas directly as it is declared globally, not on the window object.
+            const canvas = await html2canvas(renderContainer, {
+                scale: 2, // Higher scale for better quality
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+            });
+            
+            // Cleanup the hidden element immediately
+            document.body.removeChild(renderContainer);
+            renderContainer = null;
+
+            // 4. Use jsPDF to create a PDF from the canvas image
+            setProgressMessage('Step 4/4: Generating PDF...');
+            // Fix: Use jspdf directly as it is declared globally, not on the window object.
+            const { jsPDF } = jspdf;
+            const pdf = new jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4'
+            });
+            
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasHeight / canvasWidth;
+            const imgHeightInPdf = pdfWidth * ratio;
+            
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            let heightLeft = imgHeightInPdf;
+            let position = 0;
+
+            pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeightInPdf);
+            heightLeft -= pdfHeight;
+
+            while (heightLeft > 0) {
+                position = position - pdfHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeightInPdf);
+                heightLeft -= pdfHeight;
             }
             
-            const pdfName = file.name.replace(/\.docx$/i, '.pdf');
+            const blob = pdf.output('blob');
+            const url = URL.createObjectURL(blob);
+            const filename = `${file.name.replace(/\.(docx?)$/i, '')}.pdf`;
             
-            const opt = {
-              margin:       0.5,
-              filename:     pdfName,
-              image:        { type: 'jpeg', quality: 0.98 },
-              html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-              jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            // This returns a promise that resolves when the PDF is generated and saved.
-            await html2pdf().from(element).set(opt).save();
-
-            // 3. Clean up
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
             setFile(null);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-            previewRef.current.innerHTML = '';
 
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            setError("An error occurred during conversion. The file may be unsupported or corrupted.");
+            setError(`Conversion failed: ${e.message || 'An unknown error occurred.'}`);
         } finally {
+            if (renderContainer && document.body.contains(renderContainer)) {
+                document.body.removeChild(renderContainer);
+            }
             setIsConverting(false);
+            setProgressMessage('');
         }
-    };
+    }, [file]);
 
     return (
         <div className="w-full text-center flex flex-col gap-4">
-            {/* 
-              This div is used as a render target for the docx file.
-              It's positioned off-screen instead of using 'display: none'
-              because html2pdf.js cannot process elements that are not rendered in the DOM.
-              A fixed width is also applied to simulate a paper page for better layouting.
-            */}
-            <div ref={previewRef} className="absolute -left-[9999px] top-0 w-[8.5in] bg-white"></div>
-            
+             <div className="text-left p-3 text-sm bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400 rounded-r-md">
+                <strong>Note:</strong> Conversion is performed in your browser. Complex layouts and formatting may have minor variations in the final PDF.
+            </div>
             {!file ? (
                 <div
-                    onDragEnter={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                    onDragLeave={(e) => { e.preventDefault(); setIsDragOver(false); }}
+                    onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }}
+                    onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={onDrop}
                     onClick={() => fileInputRef.current?.click()}
                     className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-8 transition-all duration-300 cursor-pointer`}
                 >
-                    <input type="file" ref={fileInputRef} className="hidden" accept=".docx" onChange={onFileChange} />
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={onFileChange} />
                     <div className="flex flex-col items-center">
                         <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
                         <p className="text-gray-700">Drag & drop a Word file here, or click to select</p>
-                        <p className="text-xs text-gray-500 mt-1">Convert .docx to PDF</p>
+                        <p className="text-xs text-gray-500 mt-1">Convert .doc or .docx to PDF</p>
                     </div>
                 </div>
             ) : (
                 <div className="mt-2 text-left bg-gray-50 p-4 rounded-lg border">
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-700 truncate pr-2">{file.name}</span>
-                        <button onClick={removeFile} className="p-1 text-red-500 hover:text-red-700">
+                        <button onClick={removeFile} className="p-1 text-red-500 hover:text-red-700" disabled={isConverting}>
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
@@ -688,6 +740,18 @@ const WordToPdfTool: React.FC = () => {
             )}
             
             {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            {isConverting && (
+                <div className="mt-4 p-3 bg-gray-100 rounded-md text-center">
+                    <div className="flex items-center justify-center text-blue-600">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p>{progressMessage || 'Converting...'}</p>
+                    </div>
+                </div>
+            )}
 
             <button
                 onClick={handleConvert}
