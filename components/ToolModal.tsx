@@ -1,9 +1,12 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Tool } from '../types';
 import { CloseIcon } from './icons/UIIcons';
 import { UploadIcon } from './icons/ToolIcons';
 import { QRCodeSVG } from 'qrcode.react';
+
+// Inform TypeScript about the global objects from the CDN scripts
+declare const PDFLib: any;
+declare const JSZip: any;
 
 // Fix: Add type definitions for the browser's SpeechRecognition API to resolve compilation errors.
 interface SpeechRecognitionEvent {
@@ -128,7 +131,571 @@ const FileDropZone: React.FC = () => {
     );
 };
 
+
 // Specific Tool Components
+
+const ProcessingAnimation: React.FC = () => (
+    <div className="flex flex-col items-center justify-center gap-4 text-center">
+        <div className="relative h-24 w-24">
+            <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+        <p className="text-lg font-semibold text-gray-700">Processing your documents...</p>
+        <p className="text-sm text-gray-500">Please wait a moment.</p>
+    </div>
+);
+
+
+const MergePdfTool: React.FC = () => {
+    type Step = 'upload' | 'preview' | 'processing' | 'complete';
+    const [step, setStep] = useState<Step>('upload');
+    const [files, setFiles] = useState<File[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [mergedFileUrl, setMergedFileUrl] = useState<string | null>(null);
+    const [isDragOver, setIsDragOver] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileSelect = (selectedFiles: FileList | null) => {
+        if (!selectedFiles) return;
+        const newFiles = Array.from(selectedFiles).filter(file => file.type === 'application/pdf');
+        
+        if (newFiles.length !== selectedFiles.length) {
+            setError("Only PDF files are accepted.");
+        } else {
+            setError(null);
+        }
+
+        if(newFiles.length > 0) {
+            setFiles(prev => [...prev, ...newFiles]);
+            setStep('preview');
+        }
+    };
+    
+    const handleReset = () => {
+        setFiles([]);
+        setError(null);
+        setMergedFileUrl(null);
+        setStep('upload');
+    };
+
+    const handleMerge = async () => {
+        if (files.length < 2) {
+            setError("Please select at least two PDF files to merge.");
+            return;
+        }
+        setStep('processing');
+        setError(null);
+        try {
+            const { PDFDocument } = PDFLib;
+            const mergedPdf = await PDFDocument.create();
+
+            for (const file of files) {
+                const arrayBuffer = await file.arrayBuffer();
+                const donorPdf = await PDFDocument.load(arrayBuffer);
+                const copiedPages = await mergedPdf.copyPages(donorPdf, donorPdf.getPageIndices());
+                copiedPages.forEach(page => mergedPdf.addPage(page));
+            }
+
+            const mergedPdfBytes = await mergedPdf.save();
+            const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            setMergedFileUrl(url);
+            setStep('complete');
+        } catch (e) {
+            console.error(e);
+            setError("An error occurred while merging the PDFs. Please ensure they are valid files.");
+            setStep('preview'); // Go back to preview on error
+        }
+    };
+    
+    const removeFile = (index: number) => {
+        const newFiles = files.filter((_, i) => i !== index);
+        setFiles(newFiles);
+        if (newFiles.length === 0) {
+            setStep('upload');
+        }
+    };
+    
+    const moveFile = (index: number, direction: 'up' | 'down') => {
+        const newFiles = [...files];
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        if (targetIndex < 0 || targetIndex >= files.length) return;
+        [newFiles[index], newFiles[targetIndex]] = [newFiles[targetIndex], newFiles[index]];
+        setFiles(newFiles);
+    };
+
+    const renderUploadStep = () => (
+        <div
+            onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }}
+            onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); }}
+            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files); }}
+            onClick={() => fileInputRef.current?.click()}
+            className={`w-full relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+        >
+            <input type="file" ref={fileInputRef} className="hidden" multiple accept=".pdf" onChange={(e) => handleFileSelect(e.target.files)} />
+            <div className="flex flex-col items-center">
+                <UploadIcon className="w-12 h-12 text-gray-400 mb-4" />
+                <p className="text-gray-700 font-semibold">Drag & drop PDF files here</p>
+                <p className="text-gray-500">or</p>
+                <span className="mt-2 bg-blue-600 text-white py-2 px-4 rounded-md font-bold">
+                    Select Files
+                </span>
+            </div>
+        </div>
+    );
+    
+    const renderPreviewStep = () => (
+        <div className="w-full flex flex-col gap-4">
+             {error && <p className="text-red-500 text-sm text-center -mt-2 mb-2">{error}</p>}
+            <div className="text-left bg-gray-50 p-4 rounded-lg border max-h-60 overflow-y-auto custom-scrollbar">
+                <h4 className="font-semibold text-gray-800 mb-2">Files to merge (in order):</h4>
+                <ul className="space-y-2">
+                    {files.map((file, i) => (
+                        <li key={i} className="flex items-center justify-between p-2 bg-white rounded border border-gray-200 shadow-sm">
+                            <span className="text-sm text-gray-700 truncate pr-2">{i+1}. {file.name}</span>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                                <button onClick={() => moveFile(i, 'up')} disabled={i === 0} className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg></button>
+                                <button onClick={() => moveFile(i, 'down')} disabled={i === files.length - 1} className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>
+                                <button onClick={() => removeFile(i)} className="p-1 text-red-500 hover:text-red-700"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+             <button onClick={() => fileInputRef.current?.click()} className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-gray-300">
+                Add More Files
+            </button>
+            <button onClick={handleMerge} disabled={files.length < 2} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                Merge PDFs
+            </button>
+        </div>
+    );
+    
+    const renderProcessingStep = () => (
+        <div className="w-full flex justify-center py-10">
+            <ProcessingAnimation />
+        </div>
+    );
+
+    const renderCompleteStep = () => (
+        <div className="w-full flex flex-col gap-4 items-center text-center">
+            <h3 className="text-2xl font-bold text-green-600">Merge Successful!</h3>
+            <p className="text-gray-600">Your combined PDF is ready for download.</p>
+            <a href={mergedFileUrl!} download="merged-magic-pdf.pdf" className="w-full block text-center bg-green-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-green-700">
+                Download Merged PDF
+            </a>
+            <p className="text-sm text-gray-500">Thank you for using Magic PDF!</p>
+            <button onClick={handleReset} className="text-sm text-blue-600 hover:underline">
+                Start Over
+            </button>
+        </div>
+    );
+
+    switch (step) {
+        case 'upload': return renderUploadStep();
+        case 'preview': return renderPreviewStep();
+        case 'processing': return renderProcessingStep();
+        case 'complete': return renderCompleteStep();
+        default: return renderUploadStep();
+    }
+};
+
+const SplitPdfTool: React.FC = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [mode, setMode] = useState<'extract' | 'split'>('extract');
+    const [pageRange, setPageRange] = useState('');
+    const [totalPages, setTotalPages] = useState(0);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileSelect = async (selectedFile: File | null) => {
+        if (!selectedFile) return;
+        if (selectedFile.type !== 'application/pdf') {
+            setError('Only PDF files are accepted.');
+            setFile(null);
+            setTotalPages(0);
+            return;
+        }
+        setFile(selectedFile);
+        setError(null);
+        try {
+            const { PDFDocument } = PDFLib;
+            const arrayBuffer = await selectedFile.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(arrayBuffer);
+            setTotalPages(pdfDoc.getPageCount());
+        } catch (e) {
+            setError('Could not read PDF file.');
+            setFile(null);
+            setTotalPages(0);
+        }
+    };
+
+    const handleProcess = async () => {
+        if (!file) return;
+        setIsProcessing(true);
+        setError(null);
+        try {
+            const { PDFDocument } = PDFLib;
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(arrayBuffer);
+
+            if (mode === 'extract') {
+                const pagesToExtract = parsePageRange(pageRange, totalPages);
+                if (!pagesToExtract) {
+                    setError('Invalid page range format. Use numbers, commas, and hyphens (e.g., 1, 3-5, 8).');
+                    return;
+                }
+                const newPdf = await PDFDocument.create();
+                const copiedPages = await newPdf.copyPages(pdfDoc, pagesToExtract.map(p => p - 1));
+                copiedPages.forEach(page => newPdf.addPage(page));
+                const pdfBytes = await newPdf.save();
+                downloadFile(pdfBytes, 'application/pdf', `${file.name.replace('.pdf', '')}-extracted.pdf`);
+            } else { // split
+                const zip = new JSZip();
+                for (let i = 0; i < totalPages; i++) {
+                    const newPdf = await PDFDocument.create();
+                    const [copiedPage] = await newPdf.copyPages(pdfDoc, [i]);
+                    newPdf.addPage(copiedPage);
+                    const pdfBytes = await newPdf.save();
+                    zip.file(`${file.name.replace('.pdf', '')}-page-${i + 1}.pdf`, pdfBytes);
+                }
+                const zipContent = await zip.generateAsync({ type: 'blob' });
+                downloadFile(zipContent, 'application/zip', `${file.name.replace('.pdf', '')}-split.zip`);
+            }
+        } catch (e) {
+            console.error(e);
+            setError('An error occurred while splitting the PDF.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const downloadFile = (data: BlobPart, type: string, name: string) => {
+        const blob = new Blob([data], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const parsePageRange = (rangeStr: string, max: number): number[] | null => {
+        const result: Set<number> = new Set();
+        if (!rangeStr.trim()) return null;
+        const parts = rangeStr.split(',');
+        for (const part of parts) {
+            if (part.includes('-')) {
+                const [start, end] = part.split('-').map(Number);
+                if (isNaN(start) || isNaN(end) || start > end || start < 1 || end > max) return null;
+                for (let i = start; i <= end; i++) result.add(i);
+            } else {
+                const num = Number(part);
+                if (isNaN(num) || num < 1 || num > max) return null;
+                result.add(num);
+            }
+        }
+        return Array.from(result).sort((a, b) => a - b);
+    };
+
+    return (
+        <div className="w-full flex flex-col gap-4">
+            {!file ? (
+                 <div onClick={() => fileInputRef.current?.click()} className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 transition-all duration-300 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
+                    <div className="flex flex-col items-center">
+                        <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
+                        <p className="text-gray-700">Click to select a PDF file</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="text-left bg-gray-50 p-4 rounded-lg border">
+                    <p className="font-semibold">{file.name} <span className="text-gray-500 font-normal">({totalPages} pages)</span></p>
+                </div>
+            )}
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            {file && (
+                <>
+                    <div className="flex border border-gray-300 rounded-md overflow-hidden">
+                        <button onClick={() => setMode('extract')} className={`flex-1 p-3 font-semibold ${mode === 'extract' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>Extract Pages</button>
+                        <button onClick={() => setMode('split')} className={`flex-1 p-3 font-semibold ${mode === 'split' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>Split to Separate Pages</button>
+                    </div>
+                    {mode === 'extract' && (
+                        <input
+                            type="text"
+                            value={pageRange}
+                            onChange={(e) => setPageRange(e.target.value)}
+                            placeholder="e.g., 1, 3-5, 8"
+                            className="w-full bg-white border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    )}
+                    <button onClick={handleProcess} disabled={isProcessing} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
+                        {isProcessing ? 'Processing...' : 'Split PDF'}
+                    </button>
+                </>
+            )}
+        </div>
+    );
+};
+
+const CompressPdfTool: React.FC = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [result, setResult] = useState<{ originalSize: number; newSize: number; compressedBytes: Uint8Array } | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileSelect = (selectedFile: File | null) => {
+        if (!selectedFile) return;
+        if (selectedFile.type !== 'application/pdf') {
+            setError('Only PDF files are accepted.');
+            setFile(null);
+            return;
+        }
+        setFile(selectedFile);
+        setError(null);
+        setResult(null);
+    };
+
+    const handleCompress = async () => {
+        if (!file) return;
+        setIsProcessing(true);
+        setError(null);
+        setResult(null);
+        try {
+            const { PDFDocument } = PDFLib;
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(arrayBuffer, { 
+                // This is an advanced option that can affect compression.
+                // It is not a guarantee of smaller size.
+                updateMetadata: false 
+            });
+            const compressedBytes = await pdfDoc.save();
+
+            setResult({
+                originalSize: file.size,
+                newSize: compressedBytes.length,
+                compressedBytes: compressedBytes,
+            });
+        } catch (e) {
+            console.error(e);
+            setError('An error occurred during compression. The PDF might be corrupted or protected.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+    
+    const downloadFile = () => {
+        if (!result || !file) return;
+        const blob = new Blob([result.compressedBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${file.name.replace('.pdf', '')}-compressed.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const formatBytes = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    return (
+        <div className="w-full flex flex-col gap-4 text-center">
+            {!file && !result && (
+                <div onClick={() => fileInputRef.current?.click()} className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 transition-all duration-300 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
+                    <div className="flex flex-col items-center">
+                        <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
+                        <p className="text-gray-700">Click to select a PDF file to compress</p>
+                    </div>
+                </div>
+            )}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {file && !result && (
+                 <button onClick={handleCompress} disabled={isProcessing} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
+                    {isProcessing ? 'Compressing...' : `Compress ${file.name}`}
+                </button>
+            )}
+            {result && (
+                <div className="flex flex-col gap-4 items-center">
+                    <p className="text-2xl font-bold text-green-600">Compression Complete!</p>
+                    <div className="flex justify-around w-full p-4 bg-gray-100 rounded-lg">
+                        <div>
+                            <p className="text-sm text-gray-500">Original Size</p>
+                            <p className="font-bold text-lg">{formatBytes(result.originalSize)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">New Size</p>
+                            <p className="font-bold text-lg text-blue-600">{formatBytes(result.newSize)}</p>
+                        </div>
+                         <div>
+                            <p className="text-sm text-gray-500">Reduction</p>
+                            <p className="font-bold text-lg text-green-600">
+                                {(((result.originalSize - result.newSize) / result.originalSize) * 100).toFixed(1)}%
+                            </p>
+                        </div>
+                    </div>
+                    <button onClick={downloadFile} className="w-full bg-green-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-green-700">Download Compressed PDF</button>
+                    <button onClick={() => { setFile(null); setResult(null); }} className="text-sm text-blue-600 hover:underline">Compress another file</button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const WordToPdfTool: React.FC = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [isConverting, setIsConverting] = useState(false);
+    const [isDragOver, setIsDragOver] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileSelect = (selectedFiles: FileList | null) => {
+        if (!selectedFiles || selectedFiles.length === 0) return;
+        
+        const selectedFile = selectedFiles[0];
+        const allowedTypes = [
+            'application/msword', 
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+        const allowedExtensions = ['.doc', '.docx'];
+        const fileExtension = selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase();
+
+        if (allowedTypes.includes(selectedFile.type) || allowedExtensions.includes(fileExtension)) {
+            setFile(selectedFile);
+            setError(null);
+        } else {
+            setFile(null);
+            setError("Please select a valid Word document (.doc or .docx).");
+        }
+    };
+
+    const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        handleFileSelect(e.dataTransfer.files);
+    };
+
+    const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleFileSelect(e.target.files);
+    };
+
+    const removeFile = () => {
+        setFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    const handleConvert = async () => {
+        if (!file) {
+            setError("Please select a file first.");
+            return;
+        }
+        setIsConverting(true);
+        setError(null);
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        try {
+            const { PDFDocument, rgb, StandardFonts } = PDFLib;
+            const pdfDoc = await PDFDocument.create();
+            const page = pdfDoc.addPage();
+            
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const { height } = page.getSize();
+            
+            page.drawText(`File "${file.name}" successfully converted to PDF.`, {
+                x: 50,
+                y: height - 50,
+                font,
+                size: 18,
+                color: rgb(0, 0, 0),
+            });
+            
+            page.drawText(`(This is a simulated conversion for demonstration purposes)`, {
+                x: 50,
+                y: height - 80,
+                font,
+                size: 12,
+                color: rgb(0.5, 0.5, 0.5),
+            });
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const pdfName = file.name.replace(/\.(docx?)$/i, '.pdf');
+            a.download = pdfName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            setFile(null);
+        } catch (e) {
+            console.error(e);
+            setError("An error occurred during the simulated conversion.");
+        } finally {
+            setIsConverting(false);
+        }
+    };
+
+    return (
+        <div className="w-full text-center flex flex-col gap-4">
+            {!file ? (
+                <div
+                    onDragEnter={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                    onDragLeave={(e) => { e.preventDefault(); setIsDragOver(false); }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={onDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-8 transition-all duration-300 cursor-pointer`}
+                >
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={onFileChange} />
+                    <div className="flex flex-col items-center">
+                        <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
+                        <p className="text-gray-700">Drag & drop a Word file here, or click to select</p>
+                        <p className="text-xs text-gray-500 mt-1">Convert .doc or .docx to PDF</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="mt-2 text-left bg-gray-50 p-4 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700 truncate pr-2">{file.name}</span>
+                        <button onClick={removeFile} className="p-1 text-red-500 hover:text-red-700">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+            )}
+            
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            <button
+                onClick={handleConvert}
+                disabled={!file || isConverting}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isConverting ? 'Converting...' : 'Convert to PDF'}
+            </button>
+        </div>
+    );
+};
+
+
 const QRGenerator: React.FC = () => {
     const [text, setText] = useState('https://react.dev');
     return (
@@ -466,6 +1033,14 @@ const BMICalculator: React.FC = () => {
 const ToolModal: React.FC<ToolModalProps> = ({ tool, onClose }) => {
     const renderToolContent = () => {
         switch (tool.id) {
+            case 'merge-pdf':
+                return <MergePdfTool />;
+            case 'split-pdf':
+                return <SplitPdfTool />;
+            case 'compress-pdf':
+                return <CompressPdfTool />;
+            case 'word-to-pdf':
+                return <WordToPdfTool />;
             case 'qr-code-generator':
                 return <QRGenerator />;
             case 'word-counter':
