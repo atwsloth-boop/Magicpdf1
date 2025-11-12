@@ -5,8 +5,8 @@ export const LogoIcon: React.FC<{ className?: string }> = (props) => (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" >
       <defs>
         <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: 'rgb(0, 255, 255)', stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: 'rgb(0, 150, 255)', stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: 'rgb(59, 130, 246)', stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: 'rgb(29, 78, 216)', stopOpacity: 1 }} />
         </linearGradient>
       </defs>
       {/* Document shape */}
