@@ -810,109 +810,6 @@ const WordCounter: React.FC = () => {
     );
 }
 
-const TextToSpeech: React.FC = () => {
-    const [text, setText] = useState("Hello from Magic PDF! This is a text-to-speech demonstration.");
-    
-    const handleSpeak = () => {
-        if ('speechSynthesis' in window && text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            window.speechSynthesis.cancel(); // Cancel any previous speech
-            window.speechSynthesis.speak(utterance);
-        } else {
-            alert("Sorry, your browser doesn't support text-to-speech.");
-        }
-    };
-    
-    return (
-        <div className="w-full flex flex-col gap-4">
-            <textarea 
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={6}
-                placeholder="Enter text to speak..."
-                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none custom-scrollbar"
-            />
-            <button
-                onClick={handleSpeak}
-                disabled={!text.trim()}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50"
-            >
-                Speak
-            </button>
-        </div>
-    );
-};
-
-const SpeechToText: React.FC = () => {
-    const [isListening, setIsListening] = useState(false);
-    const [transcript, setTranscript] = useState('');
-    const recognitionRef = useRef<SpeechRecognition | null>(null);
-
-    useEffect(() => {
-        if (!('webkitSpeechRecognition' in window)) {
-            alert("Sorry, your browser doesn't support speech-to-text.");
-            return;
-        }
-
-        const recognition = new window.webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
-
-        recognition.onresult = (event) => {
-            let interimTranscript = '';
-            let finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
-                }
-            }
-             setTranscript(prev => prev + finalTranscript + interimTranscript);
-        };
-        
-        recognitionRef.current = recognition;
-
-        return () => {
-            if (recognitionRef.current) {
-                recognitionRef.current.stop();
-            }
-        };
-    }, []);
-
-    const handleToggleListen = () => {
-        if (isListening) {
-            recognitionRef.current?.stop();
-            setIsListening(false);
-        } else {
-            setTranscript(''); // Reset transcript on new start
-            recognitionRef.current?.start();
-            setIsListening(true);
-        }
-    };
-
-    return (
-        <div className="w-full flex flex-col gap-4">
-            <button
-                onClick={handleToggleListen}
-                className={`w-full py-3 px-4 rounded-md font-bold text-white transition-all duration-300 ${
-                    isListening ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-            >
-                {isListening ? 'Stop Listening' : 'Start Listening'}
-            </button>
-            <textarea 
-                value={transcript}
-                readOnly
-                rows={8}
-                placeholder="Your transcribed text will appear here..."
-                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none custom-scrollbar"
-            />
-        </div>
-    );
-};
-
 const PasswordGenerator: React.FC = () => {
     const [length, setLength] = useState(16);
     const [includeUppercase, setIncludeUppercase] = useState(true);
@@ -1116,10 +1013,6 @@ const ToolPage: React.FC<ToolPageProps> = ({ tool }) => {
                 return <QRGenerator />;
             case 'word-counter':
                 return <WordCounter />;
-            case 'text-to-speech':
-                return <TextToSpeech />;
-            case 'speech-to-text':
-                return <SpeechToText />;
             case 'password-generator':
                 return <PasswordGenerator />;
             case 'age-calculator':

@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 export const MergeIcon: React.FC<{ className?: string }> = (props) => (
@@ -139,18 +140,6 @@ export const JsonIcon: React.FC<{ className?: string }> = (props) => (
     </svg>
 );
 
-export const TextToSpeechIcon: React.FC<{ className?: string }> = (props) => (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"/><path d="M19 3h-3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h3"/><path d="M12 7.5 14 9V6l-2 1.5Z"/><path d="M14 19h2a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2v5Z"/><path d="M14 15h2.5"/><path d="M19 19v-5"/>
-    </svg>
-);
-
-export const SpeechToTextIcon: React.FC<{ className?: string }> = (props) => (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M17 10v1a5 5 0 0 1-5 5 5 5 0 0 1-5-5v-1"/><path d="M19.5 15.5 22 18"/><path d="M4 21l8-8"/>
-    </svg>
-);
-
 export const TimerIcon: React.FC<{ className?: string }> = (props) => (
     <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M10 2h4"/><path d="M12 14v-4"/><path d="M4 13a8 8 0 0 1 8-7 8 8 0 1 1-5.3 14L4 17.6"/><path d="M9 17H4v5"/>
@@ -162,4 +151,3 @@ export const UploadIcon: React.FC<{ className?: string }> = (props) => (
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
     </svg>
 );
-    

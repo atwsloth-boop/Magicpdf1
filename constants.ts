@@ -1,10 +1,11 @@
 
+
 import { Tool, ToolCategory } from './types';
 import { 
     MergeIcon, SplitIcon, CompressIcon, WordIcon, PowerPointIcon, ExcelIcon, JpgIcon, 
     OrganizeIcon, EditIcon, RotateIcon, UnlockIcon, ProtectIcon, PageNumberIcon, 
     WatermarkIcon, ImageIcon, QrCodeIcon, PasswordIcon, CounterIcon, AgeIcon, BmiIcon,
-    ColorPickerIcon, UnitConverterIcon, JsonIcon, TextToSpeechIcon, SpeechToTextIcon, TimerIcon
+    ColorPickerIcon, UnitConverterIcon, JsonIcon, TimerIcon
 } from './components/icons/ToolIcons';
 
 export const TOOLS: Tool[] = [
@@ -13,8 +14,6 @@ export const TOOLS: Tool[] = [
   { id: 'split-pdf', title: 'Split PDF', description: 'Extract pages from a PDF or save each page as a separate PDF.', icon: SplitIcon, category: ToolCategory.PDF },
   { id: 'compress-pdf', title: 'Compress PDF', description: 'Reduce the file size of your PDF while optimizing for quality.', icon: CompressIcon, category: ToolCategory.PDF },
   { id: 'pdf-to-word', title: 'PDF to Word', description: 'Convert your PDFs to editable DOC and DOCX files.', icon: WordIcon, category: ToolCategory.PDF },
-  { id: 'pdf-to-powerpoint', title: 'PDF to PowerPoint', description: 'Convert your PDFs to easy-to-edit PPT and PPTX slideshows.', icon: PowerPointIcon, category: ToolCategory.PDF },
-  { id: 'pdf-to-excel', title: 'PDF to Excel', description: 'Pull data directly from PDFs into Excel spreadsheets.', icon: ExcelIcon, category: ToolCategory.PDF },
   { id: 'word-to-pdf', title: 'Word to PDF', description: 'Convert Word documents to PDF format.', icon: WordIcon, category: ToolCategory.PDF },
   { id: 'powerpoint-to-pdf', title: 'PowerPoint to PDF', description: 'Convert PowerPoint presentations to PDF format.', icon: PowerPointIcon, category: ToolCategory.PDF },
   { id: 'excel-to-pdf', title: 'Excel to PDF', description: 'Convert Excel spreadsheets to PDF format.', icon: ExcelIcon, category: ToolCategory.PDF },
@@ -35,8 +34,6 @@ export const TOOLS: Tool[] = [
   // Text Tools
   { id: 'word-counter', title: 'Word & Character Counter', description: 'Count words and characters in your text.', icon: CounterIcon, category: ToolCategory.TEXT },
   { id: 'json-formatter', title: 'JSON Formatter', description: 'Format and validate JSON data.', icon: JsonIcon, category: ToolCategory.TEXT },
-  { id: 'text-to-speech', title: 'Text to Speech', description: 'Convert text into spoken audio.', icon: TextToSpeechIcon, category: ToolCategory.TEXT },
-  { id: 'speech-to-text', title: 'Speech to Text', description: 'Transcribe spoken words into text.', icon: SpeechToTextIcon, category: ToolCategory.TEXT },
 
   // Utility Tools
   { id: 'qr-code-generator', title: 'QR Code Generator', description: 'Create QR codes for URLs, text, and more.', icon: QrCodeIcon, category: ToolCategory.UTILITY },
