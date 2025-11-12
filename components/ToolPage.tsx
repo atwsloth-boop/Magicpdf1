@@ -7,6 +7,8 @@ import { QRCodeSVG } from 'qrcode.react';
 // Inform TypeScript about the global objects from the CDN scripts
 declare const PDFLib: any;
 declare const JSZip: any;
+declare const docx: any;
+declare const html2pdf: any;
 
 // Fix: Add type definitions for the browser's SpeechRecognition API to resolve compilation errors.
 interface SpeechRecognitionEvent {
@@ -560,24 +562,22 @@ const WordToPdfTool: React.FC = () => {
     const [isDragOver, setIsDragOver] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const previewRef = useRef<HTMLDivElement>(null); // Ref for the hidden render target
 
     const handleFileSelect = (selectedFiles: FileList | null) => {
         if (!selectedFiles || selectedFiles.length === 0) return;
         
         const selectedFile = selectedFiles[0];
-        const allowedTypes = [
-            'application/msword', 
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        ];
-        const allowedExtensions = ['.doc', '.docx'];
+        // docx-preview only supports .docx, not .doc
+        const allowedExtensions = ['.docx'];
         const fileExtension = selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase();
 
-        if (allowedTypes.includes(selectedFile.type) || allowedExtensions.includes(fileExtension)) {
+        if (allowedExtensions.includes(fileExtension)) {
             setFile(selectedFile);
             setError(null);
         } else {
             setFile(null);
-            setError("Please select a valid Word document (.doc or .docx).");
+            setError("Please select a valid Word document (.docx). The .doc format is not supported.");
         }
     };
 
@@ -596,58 +596,53 @@ const WordToPdfTool: React.FC = () => {
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
+        if (previewRef.current) {
+            previewRef.current.innerHTML = ''; // Clear preview
+        }
     };
 
     const handleConvert = async () => {
-        if (!file) {
+        if (!file || !previewRef.current) {
             setError("Please select a file first.");
             return;
         }
         setIsConverting(true);
         setError(null);
         
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Clear previous render
+        previewRef.current.innerHTML = '';
 
         try {
-            const { PDFDocument, rgb, StandardFonts } = PDFLib;
-            const pdfDoc = await PDFDocument.create();
-            const page = pdfDoc.addPage();
-            
-            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-            const { height } = page.getSize();
-            
-            page.drawText(`File "${file.name}" successfully converted to PDF.`, {
-                x: 50,
-                y: height - 50,
-                font,
-                size: 18,
-                color: rgb(0, 0, 0),
-            });
-            
-            page.drawText(`(This is a simulated conversion for demonstration purposes)`, {
-                x: 50,
-                y: height - 80,
-                font,
-                size: 12,
-                color: rgb(0.5, 0.5, 0.5),
-            });
+            // 1. Render docx to the hidden div
+            await docx.renderAsync(file, previewRef.current);
 
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const pdfName = file.name.replace(/\.(docx?)$/i, '.pdf');
-            a.download = pdfName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            // 2. Use html2pdf to convert the rendered content
+            const element = previewRef.current;
+            if (element.innerHTML === '') {
+                throw new Error("Failed to render the document. The file might be empty or corrupted.");
+            }
             
+            const pdfName = file.name.replace(/\.docx$/i, '.pdf');
+            
+            const opt = {
+              margin:       0.5,
+              filename:     pdfName,
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+              jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // This returns a promise that resolves when the PDF is generated and saved.
+            await html2pdf().from(element).set(opt).save();
+
+            // 3. Clean up
             setFile(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            previewRef.current.innerHTML = '';
+
         } catch (e) {
             console.error(e);
-            setError("An error occurred during the simulated conversion.");
+            setError("An error occurred during conversion. The file may be unsupported or corrupted.");
         } finally {
             setIsConverting(false);
         }
@@ -655,6 +650,9 @@ const WordToPdfTool: React.FC = () => {
 
     return (
         <div className="w-full text-center flex flex-col gap-4">
+            {/* Hidden div for rendering docx */}
+            <div ref={previewRef} className="hidden docx-preview-wrapper"></div>
+            
             {!file ? (
                 <div
                     onDragEnter={(e) => { e.preventDefault(); setIsDragOver(true); }}
@@ -664,11 +662,11 @@ const WordToPdfTool: React.FC = () => {
                     onClick={() => fileInputRef.current?.click()}
                     className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-8 transition-all duration-300 cursor-pointer`}
                 >
-                    <input type="file" ref={fileInputRef} className="hidden" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={onFileChange} />
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".docx" onChange={onFileChange} />
                     <div className="flex flex-col items-center">
                         <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
                         <p className="text-gray-700">Drag & drop a Word file here, or click to select</p>
-                        <p className="text-xs text-gray-500 mt-1">Convert .doc or .docx to PDF</p>
+                        <p className="text-xs text-gray-500 mt-1">Convert .docx to PDF</p>
                     </div>
                 </div>
             ) : (
