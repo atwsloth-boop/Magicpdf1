@@ -6,11 +6,7 @@ import { ToolCategory } from '../types';
 // Helper to generate a slug for anchor links
 const toSlug = (str: string) => str.toLowerCase().replace(/\s+/g, '-');
 
-interface HeaderProps {
-  onSelectTool: (toolId: string) => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ onSelectTool }) => {
+const Header: React.FC = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleMobileMenuToggle = () => {
@@ -18,11 +14,6 @@ const Header: React.FC<HeaderProps> = ({ onSelectTool }) => {
   };
 
   const handleMobileLinkClick = () => {
-    setMobileMenuOpen(false);
-  };
-
-  const handleMergePdfClick = () => {
-    onSelectTool('merge-pdf');
     setMobileMenuOpen(false);
   };
   
@@ -37,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({ onSelectTool }) => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex-shrink-0">
-              <a href="/" className="flex items-center space-x-3 group">
+              <a href="/#" className="flex items-center space-x-3 group">
                 <LogoIcon className="h-10 w-10 text-blue-600 transition-transform duration-500 group-hover:rotate-12" />
                 <span className="text-xl font-bold text-gray-800 tracking-wider">Magic PDF</span>
               </a>
@@ -45,8 +36,8 @@ const Header: React.FC<HeaderProps> = ({ onSelectTool }) => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-              <a href="#" className={navLinkClasses}>Home{navLinkUnderline}</a>
-              <button onClick={() => onSelectTool('merge-pdf')} className={navLinkClasses}>Merge PDF{navLinkUnderline}</button>
+              <a href="/#" className={navLinkClasses}>Home{navLinkUnderline}</a>
+              <a href="#/tool/merge-pdf" className={navLinkClasses}>Merge PDF{navLinkUnderline}</a>
               <a href={`#${toSlug(ToolCategory.PDF)}`} className={navLinkClasses}>PDF Tools{navLinkUnderline}</a>
               <a href={`#${toSlug(ToolCategory.IMAGE)}`} className={navLinkClasses}>Image Tools{navLinkUnderline}</a>
               <a href={`#${toSlug(ToolCategory.TEXT)}`} className={navLinkClasses}>Text Tools{navLinkUnderline}</a>
@@ -74,8 +65,8 @@ const Header: React.FC<HeaderProps> = ({ onSelectTool }) => {
               </button>
           </div>
           <nav className="flex flex-col items-center space-y-8">
-            <a href="#" onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>Home</a>
-            <button onClick={handleMergePdfClick} className={mobileNavLinkClasses}>Merge PDF</button>
+            <a href="/#" onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>Home</a>
+            <a href="#/tool/merge-pdf" onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>Merge PDF</a>
             <a href={`#${toSlug(ToolCategory.PDF)}`} onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>PDF Tools</a>
             <a href={`#${toSlug(ToolCategory.IMAGE)}`} onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>Image Tools</a>
             <a href={`#${toSlug(ToolCategory.TEXT)}`} onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>Text Tools</a>

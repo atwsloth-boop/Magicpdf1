@@ -3,14 +3,10 @@ import React from 'react';
 import { TOOLS } from '../constants';
 import { Tool, ToolCategory } from '../types';
 
-interface MainContentProps {
-  onSelectTool: (toolId: string) => void;
-}
-
 // Helper to generate a slug for anchor links
 const toSlug = (str: string) => str.toLowerCase().replace(/\s+/g, '-');
 
-const ToolCard: React.FC<{ tool: Tool; onSelectTool: (toolId: string) => void }> = ({ tool, onSelectTool }) => {
+const ToolCard: React.FC<{ tool: Tool }> = ({ tool }) => {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
       <div className="mb-4 text-blue-600">
@@ -18,17 +14,17 @@ const ToolCard: React.FC<{ tool: Tool; onSelectTool: (toolId: string) => void }>
       </div>
       <h3 className="text-lg font-bold text-gray-800 mb-2">{tool.title}</h3>
       <p className="text-sm text-gray-500 flex-grow mb-4">{tool.description}</p>
-      <button 
-        onClick={() => onSelectTool(tool.id)}
-        className="mt-auto w-full bg-blue-50 text-blue-700 border border-blue-200 py-2 px-4 rounded-md font-semibold transition-all duration-300 hover:bg-blue-100 hover:border-blue-300"
+      <a 
+        href={`#/tool/${tool.id}`}
+        className="mt-auto block text-center w-full bg-blue-50 text-blue-700 border border-blue-200 py-2 px-4 rounded-md font-semibold transition-all duration-300 hover:bg-blue-100 hover:border-blue-300"
       >
         Launch Tool
-      </button>
+      </a>
     </div>
   );
 };
 
-const MainContent: React.FC<MainContentProps> = ({ onSelectTool }) => {
+const MainContent: React.FC = () => {
   const toolsByCategory = TOOLS.reduce((acc, tool) => {
     const { category } = tool;
     if (!acc[category]) {
@@ -66,7 +62,7 @@ const MainContent: React.FC<MainContentProps> = ({ onSelectTool }) => {
           <h2 className="text-3xl font-bold text-gray-800 mb-8 pb-2 border-b-2 border-blue-200">{category}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {toolsByCategory[category].map(tool => (
-              <ToolCard key={tool.id} tool={tool} onSelectTool={onSelectTool} />
+              <ToolCard key={tool.id} tool={tool} />
             ))}
           </div>
         </section>

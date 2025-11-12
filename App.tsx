@@ -1,34 +1,55 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
 import Footer from './components/Footer';
-import ToolModal from './components/ToolModal';
-import { Tool } from './types';
+import ToolPage from './components/ToolPage';
 import { TOOLS } from './constants';
 
 const App: React.FC = () => {
-  const [activeTool, setActiveTool] = useState<Tool | null>(null);
+  const [activeToolId, setActiveToolId] = useState<string | null>(null);
 
-  const handleSelectTool = (toolId: string) => {
-    const tool = TOOLS.find(t => t.id === toolId);
-    if (tool) {
-      setActiveTool(tool);
-    }
-  };
+  useEffect(() => {
+    const handleHashChange = () => {
+      // Get tool id from hash, e.g. #/tool/merge-pdf
+      const hash = window.location.hash;
+      const match = hash.match(/^#\/tool\/(.+)/);
+      if (match && match[1]) {
+        const tool = TOOLS.find(t => t.id === match[1]);
+        if (tool) {
+            setActiveToolId(match[1]);
+        } else {
+            // If tool doesn't exist, go back to home
+            window.location.hash = '#';
+            setActiveToolId(null);
+        }
+      } else {
+        setActiveToolId(null);
+      }
+    };
 
-  const closeModal = () => {
-    setActiveTool(null);
-  };
+    window.addEventListener('hashchange', handleHashChange, false);
+    // Initial check on load
+    handleHashChange();
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange, false);
+    };
+  }, []);
+
+  const activeTool = activeToolId ? TOOLS.find(t => t.id === activeToolId) : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-800">
-      <Header onSelectTool={handleSelectTool} />
+      <Header />
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <MainContent onSelectTool={handleSelectTool}/>
+        {activeTool ? (
+          <ToolPage tool={activeTool} />
+        ) : (
+          <MainContent />
+        )}
         <Footer />
       </div>
-      {activeTool && <ToolModal tool={activeTool} onClose={closeModal} />}
     </div>
   );
 };
