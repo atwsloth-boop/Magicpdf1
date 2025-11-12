@@ -650,8 +650,13 @@ const WordToPdfTool: React.FC = () => {
 
     return (
         <div className="w-full text-center flex flex-col gap-4">
-            {/* Hidden div for rendering docx */}
-            <div ref={previewRef} className="hidden docx-preview-wrapper"></div>
+            {/* 
+              This div is used as a render target for the docx file.
+              It's positioned off-screen instead of using 'display: none' (the 'hidden' class)
+              because html2pdf.js cannot process elements that are not rendered in the DOM.
+              A fixed width is also applied to simulate a paper page for better layouting.
+            */}
+            <div ref={previewRef} className="absolute -left-[9999px] top-0 w-[8.5in] bg-white"></div>
             
             {!file ? (
                 <div
