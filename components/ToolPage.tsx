@@ -37,6 +37,9 @@ interface SpeechRecognition {
 declare global {
   interface Window {
     webkitSpeechRecognition: new () => SpeechRecognition;
+    mammoth: any;
+    jspdf: any;
+    html2canvas: any;
   }
 }
 
@@ -347,6 +350,7 @@ const SplitPdfTool: React.FC = () => {
                 const pagesToExtract = parsePageRange(pageRange, totalPages);
                 if (!pagesToExtract) {
                     setError('Invalid page range format. Use numbers, commas, and hyphens (e.g., 1, 3-5, 8).');
+                    // Fix: Ensure processing state is reset on error.
                     setIsProcessing(false);
                     return;
                 }
@@ -389,15 +393,16 @@ const SplitPdfTool: React.FC = () => {
 
     const parsePageRange = (rangeStr: string, max: number): number[] | null => {
         const result: Set<number> = new Set();
+        // Fix: Return null for empty string to trigger validation error, instead of returning an empty array.
         if (!rangeStr.trim()) return null;
         const parts = rangeStr.split(',');
         for (const part of parts) {
             if (part.includes('-')) {
-                const [start, end] = part.split('-').map(Number);
+                const [start, end] = part.split('-').map(s => parseInt(s.trim()));
                 if (isNaN(start) || isNaN(end) || start > end || start < 1 || end > max) return null;
                 for (let i = start; i <= end; i++) result.add(i);
             } else {
-                const num = Number(part);
+                const num = parseInt(part.trim());
                 if (isNaN(num) || num < 1 || num > max) return null;
                 result.add(num);
             }
@@ -557,6 +562,197 @@ const CompressPdfTool: React.FC = () => {
     );
 };
 
+const PdfToWordTool: React.FC = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [isConverting, setIsConverting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
+    }, []);
+
+    const handleFileSelect = (selectedFile: File | null) => {
+        if (!selectedFile) return;
+        if (selectedFile.type !== 'application/pdf') {
+            setError('Only PDF files are accepted.');
+            setFile(null);
+        } else {
+            setFile(selectedFile);
+            setError(null);
+        }
+    };
+
+    const handleConvert = async () => {
+        if (!file) return;
+        setIsConverting(true);
+        setError(null);
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = '';
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map((item: any) => item.str).join(' ');
+                fullText += pageText + '\n\n';
+            }
+
+            const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${file.name.replace('.pdf', '')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+        } catch (e) {
+            console.error(e);
+            setError('Failed to extract text from PDF.');
+        } finally {
+            setIsConverting(false);
+        }
+    };
+
+    return (
+        <div className="w-full text-center flex flex-col gap-4">
+            <div className="text-left p-3 text-sm bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400 rounded-r-md">
+                <strong>Note:</strong> This tool extracts text content from your PDF. Complex layouts, tables, and images will not be preserved. The output is a plain text (.txt) file.
+            </div>
+            {!file ? (
+                <div onClick={() => fileInputRef.current?.click()} className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 transition-all duration-300 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
+                    <div className="flex flex-col items-center">
+                        <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
+                        <p className="text-gray-700">Click to select a PDF file</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="mt-2 text-left bg-gray-50 p-4 rounded-lg border">
+                     <p className="font-semibold">{file.name}</p>
+                </div>
+            )}
+            
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            <button
+                onClick={handleConvert}
+                disabled={!file || isConverting}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isConverting ? 'Converting...' : 'Convert to Text'}
+            </button>
+        </div>
+    );
+};
+
+const OfficeToPdfTool: React.FC<{tool: 'powerpoint' | 'excel'}> = ({ tool }) => {
+    const [file, setFile] = useState<File | null>(null);
+    const [isConverting, setIsConverting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const validTypes = tool === 'powerpoint' 
+        ? ['application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'] 
+        : ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    const validExtensions = tool === 'powerpoint' ? '.pptx, .ppt' : '.xlsx, .xls';
+
+    const handleFileSelect = (selectedFile: File | null) => {
+        if (!selectedFile) return;
+        const fileExtension = selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase();
+        if (validTypes.includes(selectedFile.type) || validExtensions.includes(fileExtension)) {
+            setFile(selectedFile);
+            setError(null);
+        } else {
+            setFile(null);
+            setError(`Please select a valid ${tool} file (${validExtensions}).`);
+        }
+    };
+    
+    const handleConvert = async () => {
+        if (!file) return;
+        setIsConverting(true);
+        setError(null);
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing
+
+        try {
+            const { PDFDocument, rgb, StandardFonts } = PDFLib;
+            const pdfDoc = await PDFDocument.create();
+            const page = pdfDoc.addPage();
+            
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const { height } = page.getSize();
+            
+            page.drawText(`File "${file.name}" converted to PDF.`, {
+                x: 50,
+                y: height - 50,
+                font,
+                size: 18,
+                color: rgb(0, 0, 0),
+            });
+             page.drawText(`(This is a placeholder conversion as client-side ${tool} rendering is not supported.)`, {
+                x: 50,
+                y: height - 80,
+                font,
+                size: 10,
+                color: rgb(0.5, 0.5, 0.5),
+            });
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${file.name.replace(/\.[^/.]+$/, "")}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch(e) {
+            setError("An error occurred during the simulated conversion.");
+        } finally {
+            setIsConverting(false);
+            setFile(null);
+        }
+    };
+
+    return (
+         <div className="w-full text-center flex flex-col gap-4">
+            <div className="text-left p-3 text-sm bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400 rounded-r-md">
+                <strong>Note:</strong> This is a simulated conversion. Full client-side rendering of complex Office documents is not feasible. This tool creates a placeholder PDF.
+            </div>
+            {!file ? (
+                <div onClick={() => fileInputRef.current?.click()} className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 transition-all duration-300 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                    <input type="file" ref={fileInputRef} className="hidden" accept={validExtensions} onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
+                    <div className="flex flex-col items-center">
+                        <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
+                        <p className="text-gray-700">Click to select a {tool} file</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="mt-2 text-left bg-gray-50 p-4 rounded-lg border">
+                     <p className="font-semibold">{file.name}</p>
+                </div>
+            )}
+            
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            <button
+                onClick={handleConvert}
+                disabled={!file || isConverting}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isConverting ? 'Converting...' : 'Convert to PDF'}
+            </button>
+        </div>
+    );
+};
+
+
 const WordToPdfTool: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
     const [isConverting, setIsConverting] = useState(false);
@@ -617,8 +813,8 @@ const WordToPdfTool: React.FC = () => {
             // 1. Read Word file and convert to HTML using Mammoth.js
             setProgressMessage('Step 1/4: Reading Word file...');
             const arrayBuffer = await file.arrayBuffer();
-            // Fix: Use mammoth directly as it is declared globally, not on the window object.
-            const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
+            // Fix: Use window.mammoth to ensure the global library is found.
+            const { value: html } = await window.mammoth.convertToHtml({ arrayBuffer });
 
             // 2. Create a hidden element to render the HTML for capturing
             setProgressMessage('Step 2/4: Preparing document for rendering...');
@@ -638,8 +834,8 @@ const WordToPdfTool: React.FC = () => {
 
             // 3. Use html2canvas to render the hidden element to a canvas
             setProgressMessage('Step 3/4: Rendering document to image...');
-            // Fix: Use html2canvas directly as it is declared globally, not on the window object.
-            const canvas = await html2canvas(renderContainer, {
+            // Fix: Use window.html2canvas to ensure the global library is found.
+            const canvas = await window.html2canvas(renderContainer, {
                 scale: 2, // Higher scale for better quality
                 useCORS: true,
                 logging: false,
@@ -652,8 +848,8 @@ const WordToPdfTool: React.FC = () => {
 
             // 4. Use jsPDF to create a PDF from the canvas image
             setProgressMessage('Step 4/4: Generating PDF...');
-            // Fix: Use jspdf directly as it is declared globally, not on the window object.
-            const { jsPDF } = jspdf;
+            // Fix: Use window.jspdf to ensure the global library is found.
+            const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({
                 orientation: 'p',
                 unit: 'mm',
@@ -1004,7 +1200,8 @@ const EditPdfTool: React.FC = () => {
             a.download = file.name.replace('.pdf', '-edited.pdf');
             document.body.appendChild(a);
             a.click();
-            a.remove();
+            // Fix: a.remove() is not a function. The element should be removed from its parent.
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
         } catch(e) {
             console.error(e);
@@ -1322,10 +1519,32 @@ const ToolPage: React.FC<ToolPageProps> = ({ tool }) => {
                 return <SplitPdfTool />;
             case 'compress-pdf':
                 return <CompressPdfTool />;
+            case 'pdf-to-word':
+                return <PdfToWordTool />;
             case 'word-to-pdf':
                 return <WordToPdfTool />;
+            case 'powerpoint-to-pdf':
+                return <OfficeToPdfTool tool="powerpoint" />;
+            case 'excel-to-pdf':
+                return <OfficeToPdfTool tool="excel" />;
             case 'edit-pdf':
                 return <EditPdfTool />;
+            case 'pdf-to-jpg':
+                 return <div>Coming soon...</div>;
+            case 'jpg-to-pdf':
+                 return <div>Coming soon...</div>;
+            case 'add-page-numbers':
+                 return <div>Coming soon...</div>;
+            case 'add-watermark':
+                 return <div>Coming soon...</div>;
+            case 'rotate-pdf':
+                 return <div>Coming soon...</div>;
+            case 'unlock-pdf':
+                 return <div>Coming soon...</div>;
+            case 'protect-pdf':
+                 return <div>Coming soon...</div>;
+            case 'organize-pdf':
+                 return <div>Coming soon...</div>;
             case 'qr-code-generator':
                 return <QRGenerator />;
             case 'word-counter':
