@@ -7,6 +7,10 @@ import { QRCodeSVG } from 'qrcode.react';
 // Inform TypeScript about the global objects from the CDN scripts
 declare const PDFLib: any;
 declare const JSZip: any;
+declare const mammoth: any;
+declare const jspdf: any;
+declare const html2canvas: any;
+
 
 // Fix: Add type definitions for the browser's SpeechRecognition API to resolve compilation errors.
 interface SpeechRecognitionEvent {
@@ -566,10 +570,9 @@ const WordToPdfTool: React.FC = () => {
         
         const selectedFile = selectedFiles[0];
         const allowedTypes = [
-            'application/msword', 
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         ];
-        const allowedExtensions = ['.doc', '.docx'];
+        const allowedExtensions = ['.docx'];
         const fileExtension = selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase();
 
         if (allowedTypes.includes(selectedFile.type) || allowedExtensions.includes(fileExtension)) {
@@ -577,12 +580,13 @@ const WordToPdfTool: React.FC = () => {
             setError(null);
         } else {
             setFile(null);
-            setError("Please select a valid Word document (.doc or .docx).");
+            setError("Only .docx files are supported. The legacy .doc format cannot be converted in the browser.");
         }
     };
 
     const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
+        e.stopPropagation();
         setIsDragOver(false);
         handleFileSelect(e.dataTransfer.files);
     };
@@ -606,48 +610,68 @@ const WordToPdfTool: React.FC = () => {
         setIsConverting(true);
         setError(null);
         
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
         try {
-            const { PDFDocument, rgb, StandardFonts } = PDFLib;
-            const pdfDoc = await PDFDocument.create();
-            const page = pdfDoc.addPage();
-            
-            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-            const { height } = page.getSize();
-            
-            page.drawText(`File "${file.name}" successfully converted to PDF.`, {
-                x: 50,
-                y: height - 50,
-                font,
-                size: 18,
-                color: rgb(0, 0, 0),
-            });
-            
-            page.drawText(`(This is a simulated conversion for demonstration purposes)`, {
-                x: 50,
-                y: height - 80,
-                font,
-                size: 12,
-                color: rgb(0.5, 0.5, 0.5),
+            const arrayBuffer = await file.arrayBuffer();
+
+            const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
+
+            const renderContainer = document.createElement('div');
+            // A4 page aspect ratio is roughly 1:1.414
+            // Width: 210mm. Let's use pixels for canvas. 800px width should be good for quality.
+            const renderWidth = 794; // approx 210mm at 96dpi
+            renderContainer.style.position = 'absolute';
+            renderContainer.style.left = '-9999px';
+            renderContainer.style.width = `${renderWidth}px`;
+            renderContainer.style.padding = '38px'; // approx 10mm padding on each side
+            renderContainer.style.fontFamily = 'Arial, sans-serif'; // a common font
+            renderContainer.style.fontSize = '12pt';
+            renderContainer.style.backgroundColor = 'white';
+            renderContainer.style.boxSizing = 'border-box';
+            renderContainer.style.wordWrap = 'break-word';
+            renderContainer.innerHTML = html;
+            document.body.appendChild(renderContainer);
+
+            const canvas = await html2canvas(renderContainer, {
+                scale: 2, // higher scale for better resolution
+                useCORS: true,
+                logging: false,
             });
 
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const pdfName = file.name.replace(/\.(docx?)$/i, '.pdf');
-            a.download = pdfName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            document.body.removeChild(renderContainer);
+
+            const { jsPDF } = jspdf;
+            const imgData = canvas.toDataURL('image/png');
+            
+            // A4 dimensions in mm
+            const pdfWidth = 210;
+            const pdfHeight = 297; 
+
+            // Calculate the image height in the PDF to maintain aspect ratio
+            const imgHeight = canvas.height * pdfWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            // Add the first page
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+            heightLeft -= pdfHeight;
+
+            // Add more pages if the content is taller than one page
+            while (heightLeft > 0.1) { // use a small tolerance
+                position -= pdfHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pdfHeight;
+            }
+
+            const pdfName = file.name.replace(/\.docx?$/i, '.pdf');
+            pdf.save(pdfName);
             
             setFile(null);
         } catch (e) {
             console.error(e);
-            setError("An error occurred during the simulated conversion.");
+            setError("An error occurred during conversion. The .docx file might be corrupted or contain unsupported features.");
         } finally {
             setIsConverting(false);
         }
@@ -657,18 +681,18 @@ const WordToPdfTool: React.FC = () => {
         <div className="w-full text-center flex flex-col gap-4">
             {!file ? (
                 <div
-                    onDragEnter={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                    onDragLeave={(e) => { e.preventDefault(); setIsDragOver(false); }}
+                    onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }}
+                    onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={onDrop}
                     onClick={() => fileInputRef.current?.click()}
                     className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-8 transition-all duration-300 cursor-pointer`}
                 >
-                    <input type="file" ref={fileInputRef} className="hidden" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={onFileChange} />
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={onFileChange} />
                     <div className="flex flex-col items-center">
                         <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
                         <p className="text-gray-700">Drag & drop a Word file here, or click to select</p>
-                        <p className="text-xs text-gray-500 mt-1">Convert .doc or .docx to PDF</p>
+                        <p className="text-xs text-gray-500 mt-1">Accepts .docx files only</p>
                     </div>
                 </div>
             ) : (
@@ -682,7 +706,7 @@ const WordToPdfTool: React.FC = () => {
                 </div>
             )}
             
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
             <button
                 onClick={handleConvert}
