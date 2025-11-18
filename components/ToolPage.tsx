@@ -23,8 +23,8 @@ interface ToolPageProps {
 const ProcessingAnimation: React.FC<{ text?: string }> = ({ text = "Processing your documents..." }) => (
     <div className="flex flex-col items-center justify-center gap-4 text-center">
         <div className="relative h-24 w-24">
-            <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-t-blue-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-t-indigo-600 rounded-full animate-spin"></div>
         </div>
         <p className="text-lg font-semibold text-gray-700">{text}</p>
         <p className="text-sm text-gray-500">Please wait a moment.</p>
@@ -131,7 +131,7 @@ const CompressPdfTool: React.FC = () => {
                     </div>
                     <div className="text-center">
                         <p className="text-sm text-gray-500">New Size</p>
-                        <p className="font-bold text-xl text-blue-600">{formatBytes(result.newSize)}</p>
+                        <p className="font-bold text-xl text-indigo-600">{formatBytes(result.newSize)}</p>
                     </div>
                     <div className="text-center">
                         <p className="text-sm text-gray-500">Reduction</p>
@@ -146,7 +146,7 @@ const CompressPdfTool: React.FC = () => {
                 >
                     Download Compressed PDF
                 </button>
-                <button onClick={handleReset} className="text-sm text-blue-600 hover:underline">
+                <button onClick={handleReset} className="text-sm text-indigo-600 hover:underline">
                     Compress another file
                 </button>
             </div>
@@ -162,7 +162,7 @@ const CompressPdfTool: React.FC = () => {
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
@@ -174,14 +174,14 @@ const CompressPdfTool: React.FC = () => {
             ) : (
                 <div className="text-center bg-gray-50 p-4 rounded-lg border">
                     <p className="font-semibold">{file.name}</p>
-                    <button onClick={handleReset} className="text-sm text-blue-600 hover:underline mt-1">
+                    <button onClick={handleReset} className="text-sm text-indigo-600 hover:underline mt-1">
                         Choose a different file
                     </button>
                 </div>
             )}
             {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
             {file && (
-                 <button onClick={handleCompress} disabled={isProcessing} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
+                 <button onClick={handleCompress} disabled={isProcessing} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50">
                     {isProcessing ? 'Compressing...' : `Compress PDF`}
                 </button>
             )}
@@ -297,7 +297,7 @@ const SplitPdfTool: React.FC = () => {
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
@@ -310,14 +310,14 @@ const SplitPdfTool: React.FC = () => {
                 <>
                     <div className="text-center bg-gray-50 p-4 rounded-lg border">
                         <p className="font-semibold">{file.name} <span className="text-gray-500 font-normal">({totalPages} pages)</span></p>
-                        <button onClick={() => { setFile(null); setTotalPages(0); }} className="text-sm text-blue-600 hover:underline mt-1">
+                        <button onClick={() => { setFile(null); setTotalPages(0); }} className="text-sm text-indigo-600 hover:underline mt-1">
                             Choose a different file
                         </button>
                     </div>
 
                     <div className="flex border border-gray-200 rounded-lg overflow-hidden bg-gray-50 p-1">
-                        <button onClick={() => setMode('extract')} className={`flex-1 p-2 font-semibold rounded-md transition-colors ${mode === 'extract' ? 'bg-blue-600 text-white shadow' : 'text-gray-700 hover:bg-gray-200'}`}>Extract Pages</button>
-                        <button onClick={() => setMode('split')} className={`flex-1 p-2 font-semibold rounded-md transition-colors ${mode === 'split' ? 'bg-blue-600 text-white shadow' : 'text-gray-700 hover:bg-gray-200'}`}>Split All Pages</button>
+                        <button onClick={() => setMode('extract')} className={`flex-1 p-2 font-semibold rounded-md transition-colors ${mode === 'extract' ? 'bg-indigo-600 text-white shadow' : 'text-gray-700 hover:bg-gray-200'}`}>Extract Pages</button>
+                        <button onClick={() => setMode('split')} className={`flex-1 p-2 font-semibold rounded-md transition-colors ${mode === 'split' ? 'bg-indigo-600 text-white shadow' : 'text-gray-700 hover:bg-gray-200'}`}>Split All Pages</button>
                     </div>
                     {mode === 'extract' ? (
                         <div className="flex flex-col">
@@ -328,15 +328,15 @@ const SplitPdfTool: React.FC = () => {
                                 value={pageRange}
                                 onChange={(e) => setPageRange(e.target.value)}
                                 placeholder="e.g., 1, 3-5, 8"
-                                className="w-full bg-white border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full bg-white border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-indigo-500 outline-none"
                             />
                         </div>
                     ) : (
-                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-md text-center text-sm text-blue-800">
+                        <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-md text-center text-sm text-indigo-800">
                             This will create a separate PDF file for each of the {totalPages} pages. The files will be downloaded in a .zip archive.
                         </div>
                     )}
-                    <button onClick={handleProcess} disabled={isProcessing} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold text-lg transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
+                    <button onClick={handleProcess} disabled={isProcessing} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold text-lg transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50">
                         {isProcessing ? 'Processing...' : 'Split PDF'}
                     </button>
                 </>
@@ -417,7 +417,7 @@ const PdfToWordTool: React.FC = () => {
                 }
             }
 
-            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Magic PDF Conversion</title></head><body>`;
+            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Prompt Minds Conversion</title></head><body>`;
             const footer = "</body></html>";
             const sourceHTML = header + htmlBody + footer;
             
@@ -448,7 +448,7 @@ const PdfToWordTool: React.FC = () => {
                             onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                             onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
                             onClick={() => fileInputRef.current?.click()}
-                            className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                            className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                         >
                             <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                             <div className="flex flex-col items-center">
@@ -460,7 +460,7 @@ const PdfToWordTool: React.FC = () => {
                     ) : (
                         <div className="text-center bg-gray-50 p-4 rounded-lg border">
                             <p className="font-semibold">{file.name}</p>
-                            <button onClick={() => setFile(null)} className="text-sm text-blue-600 hover:underline mt-1">
+                            <button onClick={() => setFile(null)} className="text-sm text-indigo-600 hover:underline mt-1">
                                 Choose a different file
                             </button>
                         </div>
@@ -469,7 +469,7 @@ const PdfToWordTool: React.FC = () => {
                      <div className="mt-2 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg text-sm text-left">
                         <strong>Note:</strong> This tool extracts text from your PDF. Complex layouts, tables, and images may not be perfectly preserved. The output is a .doc file for basic editing.
                     </div>
-                    <button onClick={handleConvert} disabled={!file} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
+                    <button onClick={handleConvert} disabled={!file} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50">
                         Convert to Word (.doc)
                     </button>
                 </>
@@ -606,7 +606,7 @@ const WordToPdfTool: React.FC = () => {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={onDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-8 transition-all duration-300 cursor-pointer`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-8 transition-all duration-300 cursor-pointer`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={onFileChange} />
                     <div className="flex flex-col items-center">
@@ -631,7 +631,7 @@ const WordToPdfTool: React.FC = () => {
             <button
                 onClick={handleConvert}
                 disabled={!file || isConverting}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isConverting ? 'Converting...' : 'Convert to PDF'}
             </button>
@@ -768,7 +768,7 @@ const ImageCompressorTool: React.FC = () => {
                         onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files); }}
                         onClick={() => fileInputRef.current?.click()}
-                        className={`w-full relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                        className={`w-full relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                     >
                         <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/jpeg,image/png,image/webp" onChange={(e) => handleFileSelect(e.target.files)} />
                         <div className="flex flex-col items-center">
@@ -792,10 +792,10 @@ const ImageCompressorTool: React.FC = () => {
                             ))}
                         </div>
                         <div className="p-4 border rounded-lg bg-white space-y-3">
-                             <label className="font-medium text-gray-700 block">Compression Quality: <span className="font-bold text-blue-600">{Math.round(quality * 100)}%</span></label>
-                             <input type="range" min="0.1" max="1" step="0.05" value={quality} onChange={e => setQuality(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"/>
+                             <label className="font-medium text-gray-700 block">Compression Quality: <span className="font-bold text-indigo-600">{Math.round(quality * 100)}%</span></label>
+                             <input type="range" min="0.1" max="1" step="0.05" value={quality} onChange={e => setQuality(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"/>
                         </div>
-                        <button onClick={handleCompress} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold text-lg">Compress Images</button>
+                        <button onClick={handleCompress} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold text-lg">Compress Images</button>
                         <button onClick={() => fileInputRef.current?.click()} className="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md font-bold">Add More Images</button>
                     </div>
                 );
@@ -810,9 +810,9 @@ const ImageCompressorTool: React.FC = () => {
                                     <div key={i} className="flex items-center justify-between p-2 bg-white rounded border border-gray-200">
                                         <div className="truncate pr-2">
                                             <p className="text-sm font-semibold text-gray-800">{cFile.name}</p>
-                                            <p className="text-xs text-gray-500">{formatBytes(cFile.originalSize)} → <span className="font-medium text-blue-600">{formatBytes(cFile.blob.size)}</span> (<span className="text-green-600">{reduction.toFixed(1)}%</span>)</p>
+                                            <p className="text-xs text-gray-500">{formatBytes(cFile.originalSize)} → <span className="font-medium text-indigo-600">{formatBytes(cFile.blob.size)}</span> (<span className="text-green-600">{reduction.toFixed(1)}%</span>)</p>
                                         </div>
-                                        <a href={URL.createObjectURL(cFile.blob)} download={cFile.name} className="bg-blue-100 text-blue-700 text-sm font-semibold py-1 px-3 rounded-md hover:bg-blue-200">
+                                        <a href={URL.createObjectURL(cFile.blob)} download={cFile.name} className="bg-indigo-100 text-indigo-700 text-sm font-semibold py-1 px-3 rounded-md hover:bg-indigo-200">
                                             Download
                                         </a>
                                     </div>
@@ -822,7 +822,7 @@ const ImageCompressorTool: React.FC = () => {
                         {compressedFiles.length > 1 && (
                             <button onClick={handleDownloadAll} className="w-full bg-green-600 text-white py-3 px-4 rounded-md font-bold">Download All (.zip)</button>
                         )}
-                        <button onClick={handleReset} className="text-sm text-blue-600 hover:underline">Compress More Images</button>
+                        <button onClick={handleReset} className="text-sm text-indigo-600 hover:underline">Compress More Images</button>
                     </div>
                 );
         }
@@ -1034,14 +1034,14 @@ const AddWatermarkTool: React.FC = () => {
         <div className="w-full flex flex-col gap-6">
             <div className="text-center bg-gray-50 p-4 rounded-lg border">
                 <p className="font-semibold">{pdfFile?.name} <span className="text-gray-500 font-normal">({totalPages} pages)</span></p>
-                <button onClick={handleReset} className="text-sm text-blue-600 hover:underline mt-1">
+                <button onClick={handleReset} className="text-sm text-indigo-600 hover:underline mt-1">
                     Choose a different PDF
                 </button>
             </div>
 
             <div className="border border-gray-200 rounded-lg p-1 bg-gray-50 flex">
-                 <button onClick={() => setWatermarkType('text')} className={`flex-1 p-2 rounded-md font-semibold transition-colors ${watermarkType === 'text' ? 'bg-blue-600 text-white shadow' : 'text-gray-600 hover:bg-gray-200'}`}>Text Watermark</button>
-                 <button onClick={() => setWatermarkType('image')} className={`flex-1 p-2 rounded-md font-semibold transition-colors ${watermarkType === 'image' ? 'bg-blue-600 text-white shadow' : 'text-gray-600 hover:bg-gray-200'}`}>Image Watermark</button>
+                 <button onClick={() => setWatermarkType('text')} className={`flex-1 p-2 rounded-md font-semibold transition-colors ${watermarkType === 'text' ? 'bg-indigo-600 text-white shadow' : 'text-gray-600 hover:bg-gray-200'}`}>Text Watermark</button>
+                 <button onClick={() => setWatermarkType('image')} className={`flex-1 p-2 rounded-md font-semibold transition-colors ${watermarkType === 'image' ? 'bg-indigo-600 text-white shadow' : 'text-gray-600 hover:bg-gray-200'}`}>Image Watermark</button>
             </div>
             
             {/* Watermark specific options */}
@@ -1064,7 +1064,7 @@ const AddWatermarkTool: React.FC = () => {
                 ) : (
                     <div className="flex flex-col items-center gap-4">
                         {!watermarkImageFile ? (
-                             <div onClick={() => imageFileInputRef.current?.click()} className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50">
+                             <div onClick={() => imageFileInputRef.current?.click()} className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50">
                                 <input type="file" ref={imageFileInputRef} className="hidden" accept="image/jpeg,image/png" onChange={e => handleImageSelect(e.target.files?.[0] || null)} />
                                 <UploadIcon className="w-8 h-8 mx-auto text-gray-400 mb-2"/>
                                 <p className="text-sm text-gray-600">Click to select an image</p>
@@ -1075,7 +1075,7 @@ const AddWatermarkTool: React.FC = () => {
                                 <img src={imagePreview!} alt="Watermark preview" className="w-24 h-24 object-contain border rounded-md" />
                                 <div>
                                     <p className="text-sm font-medium text-gray-700">{watermarkImageFile.name}</p>
-                                    <button onClick={() => handleImageSelect(null)} className="text-xs text-blue-600 hover:underline">Change image</button>
+                                    <button onClick={() => handleImageSelect(null)} className="text-xs text-indigo-600 hover:underline">Change image</button>
                                 </div>
                             </div>
                         )}
@@ -1089,7 +1089,7 @@ const AddWatermarkTool: React.FC = () => {
                     <span className="font-medium text-gray-700">Tiled Watermark</span>
                      <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" checked={isTiled} onChange={e => setIsTiled(e.target.checked)} className="sr-only peer" />
-                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                     </label>
                 </div>
                  {!isTiled && (
@@ -1097,7 +1097,7 @@ const AddWatermarkTool: React.FC = () => {
                         <label className="font-medium text-gray-700">Position</label>
                          <div className="grid grid-cols-3 gap-2 w-32 h-32">
                             {(['top-left', 'top-center', 'top-right', 'middle-left', 'middle-center', 'middle-right', 'bottom-left', 'bottom-center', 'bottom-right'] as Position[]).map(pos => (
-                                <button key={pos} onClick={() => setPosition(pos)} className={`border rounded flex items-center justify-center transition-colors ${position === pos ? 'bg-blue-600 border-blue-700' : 'bg-white border-gray-300 hover:bg-gray-100'}`}>
+                                <button key={pos} onClick={() => setPosition(pos)} className={`border rounded flex items-center justify-center transition-colors ${position === pos ? 'bg-indigo-600 border-indigo-700' : 'bg-white border-gray-300 hover:bg-gray-100'}`}>
                                     <div className={`w-3 h-3 rounded-full ${position === pos ? 'bg-white' : 'bg-gray-400'}`}></div>
                                 </button>
                             ))}
@@ -1106,11 +1106,11 @@ const AddWatermarkTool: React.FC = () => {
                 )}
                 <div>
                     <label className="font-medium text-gray-700 block mb-1">Opacity: {Math.round(opacity * 100)}%</label>
-                    <input type="range" min="0.1" max="1" step="0.1" value={opacity} onChange={e => setOpacity(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"/>
+                    <input type="range" min="0.1" max="1" step="0.1" value={opacity} onChange={e => setOpacity(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"/>
                 </div>
                  <div>
                     <label className="font-medium text-gray-700 block mb-1">Rotation: {rotation}°</label>
-                    <input type="range" min="-180" max="180" value={rotation} onChange={e => setRotation(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"/>
+                    <input type="range" min="-180" max="180" value={rotation} onChange={e => setRotation(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"/>
                 </div>
                 <div>
                     <label className="font-medium text-gray-700 block mb-1">Page Range</label>
@@ -1118,7 +1118,7 @@ const AddWatermarkTool: React.FC = () => {
                 </div>
             </div>
 
-            <button onClick={handleProcess} disabled={isProcessing} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold text-lg transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
+            <button onClick={handleProcess} disabled={isProcessing} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold text-lg transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50">
                 Add Watermark
             </button>
         </div>
@@ -1137,7 +1137,7 @@ const AddWatermarkTool: React.FC = () => {
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handlePdfSelect(e.dataTransfer.files?.[0] || null); }}
                     onClick={() => pdfFileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                 >
                     <input type="file" ref={pdfFileInputRef} className="hidden" accept=".pdf" onChange={e => handlePdfSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
@@ -1237,14 +1237,14 @@ const MergePdfTool: React.FC = () => {
             onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
             onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files); }}
             onClick={() => fileInputRef.current?.click()}
-            className={`w-full relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+            className={`w-full relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
         >
             <input type="file" ref={fileInputRef} className="hidden" multiple accept=".pdf" onChange={(e) => handleFileSelect(e.target.files)} />
             <div className="flex flex-col items-center">
                 <UploadIcon className="w-12 h-12 text-gray-400 mb-4" />
                 <p className="text-gray-700 font-semibold">Drag & drop PDF files here</p>
                 <p className="text-gray-500">or</p>
-                <span className="mt-2 bg-blue-600 text-white py-2 px-4 rounded-md font-bold">
+                <span className="mt-2 bg-indigo-600 text-white py-2 px-4 rounded-md font-bold">
                     Select Files
                 </span>
             </div>
@@ -1261,8 +1261,8 @@ const MergePdfTool: React.FC = () => {
                         <li key={i} className="flex items-center justify-between p-2 bg-white rounded border border-gray-200 shadow-sm">
                             <span className="text-sm text-gray-700 truncate pr-2">{i+1}. {file.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                                <button onClick={() => moveFile(i, 'up')} disabled={i === 0} className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg></button>
-                                <button onClick={() => moveFile(i, 'down')} disabled={i === files.length - 1} className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>
+                                <button onClick={() => moveFile(i, 'up')} disabled={i === 0} className="p-1 text-gray-500 hover:text-indigo-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg></button>
+                                <button onClick={() => moveFile(i, 'down')} disabled={i === files.length - 1} className="p-1 text-gray-500 hover:text-indigo-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>
                                 <button onClick={() => removeFile(i)} className="p-1 text-red-500 hover:text-red-700"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                             </div>
                         </li>
@@ -1272,7 +1272,7 @@ const MergePdfTool: React.FC = () => {
              <button onClick={() => fileInputRef.current?.click()} className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-gray-300">
                 Add More Files
             </button>
-            <button onClick={handleMerge} disabled={files.length < 2} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button onClick={handleMerge} disabled={files.length < 2} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
                 Merge PDFs
             </button>
         </div>
@@ -1288,11 +1288,11 @@ const MergePdfTool: React.FC = () => {
         <div className="w-full flex flex-col gap-4 items-center text-center">
             <h3 className="text-2xl font-bold text-green-600">Merge Successful!</h3>
             <p className="text-gray-600">Your combined PDF is ready for download.</p>
-            <a href={mergedFileUrl!} download="merged-magic-pdf.pdf" className="w-full block text-center bg-green-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-green-700">
+            <a href={mergedFileUrl!} download="merged-prompt-minds.pdf" className="w-full block text-center bg-green-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-green-700">
                 Download Merged PDF
             </a>
-            <p className="text-sm text-gray-500">Thank you for using Magic PDF!</p>
-            <button onClick={handleReset} className="text-sm text-blue-600 hover:underline">
+            <p className="text-sm text-gray-500">Thank you for using Prompt Minds!</p>
+            <button onClick={handleReset} className="text-sm text-indigo-600 hover:underline">
                 Start Over
             </button>
         </div>
@@ -1454,7 +1454,7 @@ const AddPageNumbersTool: React.FC = () => {
                         key={pos}
                         onClick={() => setPosition(pos)}
                         className={`border rounded flex items-center justify-center transition-colors ${
-                            position === pos ? 'bg-blue-600 border-blue-700' : 'bg-white border-gray-300 hover:bg-gray-100'
+                            position === pos ? 'bg-indigo-600 border-indigo-700' : 'bg-white border-gray-300 hover:bg-gray-100'
                         }`}
                         aria-label={`Position ${pos.replace('-', ' ')}`}
                     >
@@ -1478,7 +1478,7 @@ const AddPageNumbersTool: React.FC = () => {
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
@@ -1491,7 +1491,7 @@ const AddPageNumbersTool: React.FC = () => {
                 <>
                     <div className="text-center bg-gray-50 p-4 rounded-lg border">
                         <p className="font-semibold">{file.name} <span className="text-gray-500 font-normal">({totalPages} pages)</span></p>
-                        <button onClick={() => { setFile(null); setTotalPages(0); }} className="text-sm text-blue-600 hover:underline mt-1">
+                        <button onClick={() => { setFile(null); setTotalPages(0); }} className="text-sm text-indigo-600 hover:underline mt-1">
                             Choose a different file
                         </button>
                     </div>
@@ -1537,7 +1537,7 @@ const AddPageNumbersTool: React.FC = () => {
                         </div>
                     </div>
 
-                    <button onClick={handleProcess} disabled={isProcessing} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
+                    <button onClick={handleProcess} disabled={isProcessing} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50">
                         {isProcessing ? 'Processing...' : 'Add Page Numbers'}
                     </button>
                 </>
@@ -1618,7 +1618,7 @@ const JpgToPdfTool: React.FC = () => {
             }
 
             const pdfBytes = await pdfDoc.save();
-            downloadFile(pdfBytes, 'application/pdf', 'converted-magic-pdf.pdf');
+            downloadFile(pdfBytes, 'application/pdf', 'converted-prompt-minds.pdf');
             setStep('complete');
 
         } catch (e) {
@@ -1643,7 +1643,7 @@ const JpgToPdfTool: React.FC = () => {
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files); }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/jpeg,image/png,image/webp" onChange={(e) => handleFileSelect(e.target.files)} />
                      <div className="flex flex-col items-center">
@@ -1669,20 +1669,20 @@ const JpgToPdfTool: React.FC = () => {
                     <div className="flex flex-col md:flex-row gap-4 p-4 border rounded-lg bg-white">
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700">Page size</label>
-                            <select value={pageSize} onChange={e => setPageSize(e.target.value as any)} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <select value={pageSize} onChange={e => setPageSize(e.target.value as any)} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                 <option>A4</option>
                                 <option>Letter</option>
                             </select>
                         </div>
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700">Orientation</label>
-                            <select value={orientation} onChange={e => setOrientation(e.target.value as any)} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <select value={orientation} onChange={e => setOrientation(e.target.value as any)} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                 <option value="portrait">Portrait</option>
                                 <option value="landscape">Landscape</option>
                             </select>
                         </div>
                     </div>
-                    <button onClick={handleConvert} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold">Convert to PDF</button>
+                    <button onClick={handleConvert} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold">Convert to PDF</button>
                     <button onClick={() => fileInputRef.current?.click()} className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-md font-bold">Add More Images</button>
                 </>
             )}
@@ -1691,7 +1691,7 @@ const JpgToPdfTool: React.FC = () => {
                  <div className="w-full flex flex-col gap-4 items-center text-center">
                     <h3 className="text-2xl font-bold text-green-600">Conversion Successful!</h3>
                     <p className="text-gray-600">Your new PDF is ready.</p>
-                    <button onClick={() => { setFiles([]); setStep('upload'); }} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold">Convert More Images</button>
+                    <button onClick={() => { setFiles([]); setStep('upload'); }} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold">Convert More Images</button>
                 </div>
             )}
         </div>
@@ -1764,7 +1764,7 @@ const PdfToJpgTool: React.FC = () => {
                             onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                             onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
                             onClick={() => fileInputRef.current?.click()}
-                            className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                            className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                         >
                             <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                             <div className="flex flex-col items-center">
@@ -1776,13 +1776,13 @@ const PdfToJpgTool: React.FC = () => {
                     ) : (
                         <div className="text-center bg-gray-50 p-4 rounded-lg border">
                             <p className="font-semibold">{file.name}</p>
-                            <button onClick={() => setFile(null)} className="text-sm text-blue-600 hover:underline mt-1">
+                            <button onClick={() => setFile(null)} className="text-sm text-indigo-600 hover:underline mt-1">
                                 Choose a different file
                             </button>
                         </div>
                     )}
                     {error && <p className="text-red-500 text-sm">{error}</p>}
-                    <button onClick={handleConvert} disabled={!file} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
+                    <button onClick={handleConvert} disabled={!file} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50">
                         Convert to JPG
                     </button>
                 </>
@@ -1855,7 +1855,7 @@ const ImageConverterTool: React.FC = () => {
                         onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files); }}
                         onClick={() => fileInputRef.current?.click()}
-                        className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                        className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                     >
                         <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/jpeg,image/png,image/webp" onChange={(e) => handleFileSelect(e.target.files)} />
                         <div className="flex flex-col items-center">
@@ -1875,14 +1875,14 @@ const ImageConverterTool: React.FC = () => {
                         </div>
                          <div className="p-4 border rounded-lg bg-white flex items-center justify-center gap-4">
                             <label htmlFor="format" className="font-medium text-gray-700">Convert to:</label>
-                            <select id="format" value={outputFormat} onChange={e => setOutputFormat(e.target.value as any)} className="w-48 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md p-2">
+                            <select id="format" value={outputFormat} onChange={e => setOutputFormat(e.target.value as any)} className="w-48 border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md p-2">
                                 <option value="jpeg">JPG</option>
                                 <option value="png">PNG</option>
                                 <option value="webp">WEBP</option>
                             </select>
                         </div>
-                        <button onClick={handleConvert} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold">Convert Images</button>
-                        <button onClick={() => { setFiles([]); setError(null); }} className="text-sm text-blue-600 hover:underline">Start Over</button>
+                        <button onClick={handleConvert} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold">Convert Images</button>
+                        <button onClick={() => { setFiles([]); setError(null); }} className="text-sm text-indigo-600 hover:underline">Start Over</button>
                     </>
                 )}
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}
@@ -1963,7 +1963,7 @@ const UnlockPdfTool: React.FC = () => {
             <div className="w-full flex flex-col gap-4 items-center text-center">
                 <h3 className="text-2xl font-bold text-green-600">PDF Unlocked Successfully!</h3>
                 <p className="text-gray-600">Your download has started. If not, please check your browser settings.</p>
-                <button onClick={handleReset} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700">
+                <button onClick={handleReset} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700">
                     Unlock Another PDF
                 </button>
             </div>
@@ -1979,7 +1979,7 @@ const UnlockPdfTool: React.FC = () => {
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
@@ -1991,7 +1991,7 @@ const UnlockPdfTool: React.FC = () => {
                 <>
                     <div className="text-center bg-gray-50 p-4 rounded-lg border">
                         <p className="font-semibold">{file?.name}</p>
-                        <button onClick={handleReset} className="text-sm text-blue-600 hover:underline mt-1">
+                        <button onClick={handleReset} className="text-sm text-indigo-600 hover:underline mt-1">
                             Choose a different file
                         </button>
                     </div>
@@ -2008,7 +2008,7 @@ const UnlockPdfTool: React.FC = () => {
                         />
                     </div>
                      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                    <button onClick={handleUnlock} disabled={!password} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
+                    <button onClick={handleUnlock} disabled={!password} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50">
                         Unlock PDF
                     </button>
                 </>
@@ -2056,8 +2056,8 @@ const ToolPage: React.FC<ToolPageProps> = ({ tool }) => {
     <div className="bg-gray-50/50 min-h-full p-4 sm:p-6 md:p-10 animate-fade-in">
         <div className="max-w-4xl mx-auto">
             <header className="text-center mb-10">
-                <div className="inline-block p-4 bg-blue-100/50 border border-blue-200/50 rounded-2xl mb-4">
-                    <tool.icon className="w-12 h-12 text-blue-600" />
+                <div className="inline-block p-4 bg-indigo-100/50 border border-indigo-200/50 rounded-2xl mb-4">
+                    <tool.icon className="w-12 h-12 text-indigo-600" />
                 </div>
                 <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900">{tool.title}</h1>
                 <p className="max-w-2xl mx-auto mt-4 text-lg text-gray-600">{tool.description}</p>

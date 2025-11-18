@@ -17,10 +17,10 @@ const Header: React.FC = () => {
     setMobileMenuOpen(false);
   };
   
-  const navLinkClasses = "relative text-gray-600 hover:text-blue-600 transition-colors duration-300 group text-sm font-medium";
-  const mobileNavLinkClasses = "text-2xl font-semibold text-gray-700 hover:text-blue-600 transition-colors";
+  const navLinkClasses = "relative text-gray-600 hover:text-indigo-600 transition-colors duration-300 group text-sm font-medium";
+  const mobileNavLinkClasses = "text-2xl font-semibold text-gray-700 hover:text-indigo-600 transition-colors";
   
-  const navLinkUnderline = <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>;
+  const navLinkUnderline = <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>;
 
   return (
     <>
@@ -29,8 +29,8 @@ const Header: React.FC = () => {
           <div className="flex items-center justify-between h-20">
             <div className="flex-shrink-0">
               <a href="/#" className="flex items-center space-x-3 group">
-                <LogoIcon className="h-10 w-10 text-blue-600 transition-transform duration-500 group-hover:rotate-12" />
-                <span className="text-xl font-bold text-gray-800 tracking-wider">Magic PDF</span>
+                <LogoIcon className="h-10 w-10 text-indigo-600 transition-transform duration-500 group-hover:rotate-12" />
+                <span className="text-xl font-bold text-gray-800 tracking-wider">Prompt Minds</span>
               </a>
             </div>
             
@@ -47,7 +47,7 @@ const Header: React.FC = () => {
 
             {/* Mobile Menu Button */}
             <div className="md:hidden">
-              <button onClick={handleMobileMenuToggle} aria-label="Open menu" className="p-2 text-gray-600 hover:text-blue-600">
+              <button onClick={handleMobileMenuToggle} aria-label="Open menu" className="p-2 text-gray-600 hover:text-indigo-600">
                 <MenuIcon className="h-6 w-6" />
               </button>
             </div>
@@ -60,7 +60,7 @@ const Header: React.FC = () => {
         className={`fixed inset-0 z-50 bg-white flex flex-col items-center justify-center transition-transform duration-300 ease-in-out md:hidden ${isMobileMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}
       >
           <div className="absolute top-0 right-0 p-4">
-              <button onClick={handleMobileMenuToggle} aria-label="Close menu" className="p-2 text-gray-600 hover:text-blue-600">
+              <button onClick={handleMobileMenuToggle} aria-label="Close menu" className="p-2 text-gray-600 hover:text-indigo-600">
                   <CloseIcon className="h-8 w-8" />
               </button>
           </div>

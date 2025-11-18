@@ -2,24 +2,18 @@
 import React from 'react';
 
 export const LogoIcon: React.FC<{ className?: string }> = (props) => (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" >
-      <defs>
-        <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: 'rgb(59, 130, 246)', stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: 'rgb(29, 78, 216)', stopOpacity: 1 }} />
-        </linearGradient>
-      </defs>
-      {/* Document shape */}
-      <path stroke="url(#logo-gradient)" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline stroke="url(#logo-gradient)" points="14 2 14 8 20 8" />
-      
-      {/* Sparkle inside */}
-      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M12 12v6" />
-      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M9 15h6" />
-      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M10.5 13.5 9 12" />
-      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M13.5 13.5 15 12" />
-      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M10.5 16.5 9 18" />
-      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M13.5 16.5 15 18" />
+    <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#818cf8"/>
+                <stop offset="100%" stopColor="#4f46e5"/>
+            </linearGradient>
+        </defs>
+        <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="url(#logo-gradient)" strokeWidth="1.5"/>
+        <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M15.5 15.5C15.5 14.1193 14.3807 13 13 13C11.6193 13 10.5 14.1193 10.5 15.5" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M9 9.5C9 8.67157 8.32843 8 7.5 8C6.67157 8 6 8.67157 6 9.5C6 10.3284 6.67157 11 7.5 11" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M17 14.5C17 13.6716 16.3284 13 15.5 13C14.6716 13 14 13.6716 14 14.5C14 15.3284 14.6716 16 15.5 16" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
 );
 
