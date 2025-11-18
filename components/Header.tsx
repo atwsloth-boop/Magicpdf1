@@ -30,7 +30,7 @@ const Header: React.FC = () => {
             <div className="flex-shrink-0">
               <a href="/#" className="flex items-center space-x-3 group">
                 <LogoIcon className="h-10 w-10 text-indigo-600 transition-transform duration-500 group-hover:rotate-12" />
-                <span className="text-xl font-bold text-gray-800 tracking-wider">Prompt Minds</span>
+                <span className="text-xl font-bold text-gray-800 tracking-wider">Magic PDF</span>
               </a>
             </div>
             

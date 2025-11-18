@@ -9,11 +9,19 @@ export const LogoIcon: React.FC<{ className?: string }> = (props) => (
                 <stop offset="100%" stopColor="#4f46e5"/>
             </linearGradient>
         </defs>
-        <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="url(#logo-gradient)" strokeWidth="1.5"/>
-        <path d="M7 12C7 9.23858 9.23858 7 12 7" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M15.5 15.5C15.5 14.1193 14.3807 13 13 13C11.6193 13 10.5 14.1193 10.5 15.5" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M9 9.5C9 8.67157 8.32843 8 7.5 8C6.67157 8 6 8.67157 6 9.5C6 10.3284 6.67157 11 7.5 11" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M17 14.5C17 13.6716 16.3284 13 15.5 13C14.6716 13 14 13.6716 14 14.5C14 15.3284 14.6716 16 15.5 16" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
+        {/* Document outline */}
+        <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        {/* Page fold */}
+        <path d="M14 2V8H20" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+
+        {/* Magic Wand */}
+        <path d="M9.5 12.5L14.5 17.5" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M8 14L10 12" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
+        
+        {/* Sparkles */}
+        <path d="M15 11L16 10" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M17 13L18 12" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M13 15L14 14" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
 );
 

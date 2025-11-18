@@ -417,7 +417,7 @@ const PdfToWordTool: React.FC = () => {
                 }
             }
 
-            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Prompt Minds Conversion</title></head><body>`;
+            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Magic PDF Conversion</title></head><body>`;
             const footer = "</body></html>";
             const sourceHTML = header + htmlBody + footer;
             
@@ -1288,10 +1288,10 @@ const MergePdfTool: React.FC = () => {
         <div className="w-full flex flex-col gap-4 items-center text-center">
             <h3 className="text-2xl font-bold text-green-600">Merge Successful!</h3>
             <p className="text-gray-600">Your combined PDF is ready for download.</p>
-            <a href={mergedFileUrl!} download="merged-prompt-minds.pdf" className="w-full block text-center bg-green-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-green-700">
+            <a href={mergedFileUrl!} download="merged-magic-pdf.pdf" className="w-full block text-center bg-green-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-green-700">
                 Download Merged PDF
             </a>
-            <p className="text-sm text-gray-500">Thank you for using Prompt Minds!</p>
+            <p className="text-sm text-gray-500">Thank you for using Magic PDF!</p>
             <button onClick={handleReset} className="text-sm text-indigo-600 hover:underline">
                 Start Over
             </button>
@@ -1618,7 +1618,7 @@ const JpgToPdfTool: React.FC = () => {
             }
 
             const pdfBytes = await pdfDoc.save();
-            downloadFile(pdfBytes, 'application/pdf', 'converted-prompt-minds.pdf');
+            downloadFile(pdfBytes, 'application/pdf', 'converted-magic-pdf.pdf');
             setStep('complete');
 
         } catch (e) {

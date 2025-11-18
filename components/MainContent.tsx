@@ -41,10 +41,10 @@ const MainContent: React.FC = () => {
       {/* Hero Section */}
       <section className="text-center mb-16">
         <h1 className="text-4xl md:text-6xl font-black text-gray-900 uppercase tracking-wider mb-4">
-          Prompt Minds Multi-Tool Hub
+          Magic PDF
         </h1>
         <p className="max-w-3xl mx-auto text-lg text-gray-600 mb-8">
-          Your futuristic command center for digital productivity. Access a universe of powerful tools designed for the modern mind.
+          The ultimate online toolkit for all your PDF needs. Merge, split, compress, convert, and edit PDFs effortlessly.
         </p>
         <div className="flex justify-center space-x-4">
           <a href={`#${toSlug(toolCategories[0])}`} className="bg-indigo-600 text-white py-3 px-8 rounded-lg font-bold transition-all duration-300 hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-600/30">
