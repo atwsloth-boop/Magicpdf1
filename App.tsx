@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
@@ -64,10 +63,10 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-gray-800">
+    <div className="min-h-screen flex flex-col bg-slate-900 text-slate-200 selection:bg-cyan-500 selection:text-white">
       <Header />
       <AdBanner placement="header" />
-      <div className="flex-1 flex w-full overflow-hidden">
+      <div className="flex-1 flex w-full overflow-hidden relative z-10">
         <AdBanner placement="left" />
         <main className="flex-1 overflow-y-auto custom-scrollbar">
           {renderContent()}
@@ -76,6 +75,12 @@ const App: React.FC = () => {
       </div>
       <AdBanner placement="footer" />
       <Footer />
+      
+      {/* Background Ambient Glow */}
+      <div className="fixed top-20 left-0 w-full h-full pointer-events-none z-0 overflow-hidden opacity-30">
+         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-cyan-600 blur-[120px]"></div>
+         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600 blur-[120px]"></div>
+      </div>
     </div>
   );
 };

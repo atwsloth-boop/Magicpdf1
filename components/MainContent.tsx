@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TOOLS } from '../constants';
 import { Tool, ToolCategory } from '../types';
@@ -8,17 +7,23 @@ const toSlug = (str: string) => str.toLowerCase().replace(/\s+/g, '-');
 
 const ToolCard: React.FC<{ tool: Tool }> = ({ tool }) => {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
-      <div className="mb-4 text-blue-600">
-        <tool.icon className="h-12 w-12" />
+    <div className="glass-panel rounded-xl p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] hover:border-cyan-500/50 hover:-translate-y-2 group relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      
+      <div className="mb-6 p-4 rounded-full bg-slate-800/50 text-cyan-400 group-hover:text-cyan-300 group-hover:scale-110 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+        <tool.icon className="h-10 w-10" />
       </div>
-      <h3 className="text-lg font-bold text-gray-800 mb-2">{tool.title}</h3>
-      <p className="text-sm text-gray-500 flex-grow mb-4">{tool.description}</p>
+      
+      <h3 className="text-lg font-bold text-slate-100 mb-3 font-orbitron tracking-wide group-hover:text-cyan-400 transition-colors">{tool.title}</h3>
+      <p className="text-sm text-slate-400 flex-grow mb-6 leading-relaxed">{tool.description}</p>
+      
       <a 
         href={`#/tool/${tool.id}`}
-        className="mt-auto block text-center w-full bg-blue-50 text-blue-700 border border-blue-200 py-2 px-4 rounded-md font-semibold transition-all duration-300 hover:bg-blue-100 hover:border-blue-300"
+        className="mt-auto w-full py-2.5 px-4 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300 
+        bg-slate-800 text-cyan-400 border border-slate-700 
+        hover:bg-cyan-500 hover:text-slate-900 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.4)]"
       >
-        Launch Tool
+        Launch
       </a>
     </div>
   );
@@ -37,29 +42,30 @@ const MainContent: React.FC = () => {
   const toolCategories = Object.keys(toolsByCategory) as ToolCategory[];
 
   return (
-    <main className="flex-1 p-6 md:p-10">
+    <main className="flex-1 p-6 md:p-10 pb-20">
       {/* Hero Section */}
-      <section className="text-center mb-16">
-        <h1 className="text-4xl md:text-6xl font-black text-gray-900 uppercase tracking-wider mb-4">
-          Magic PDF Toolkit
-        </h1>
-        <p className="max-w-3xl mx-auto text-lg text-gray-600 mb-8">
-          Effortlessly manage your documents. A complete suite of powerful, easy-to-use PDF tools right at your fingertips.
-        </p>
-        <div className="flex justify-center space-x-4">
-          <a href={`#${toSlug(toolCategories[0])}`} className="bg-blue-600 text-white py-3 px-8 rounded-lg font-bold transition-all duration-300 hover:bg-blue-700 shadow-lg shadow-blue-500/20 hover:shadow-blue-600/30">
-            Explore Tools
-          </a>
-          <button className="bg-gray-200 text-gray-800 py-3 px-8 rounded-lg font-bold transition-all duration-300 hover:bg-gray-300">
-            Learn More
-          </button>
+      <section className="text-center mb-20 pt-10 relative">
+        <div className="relative z-10">
+            <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 uppercase tracking-widest mb-6 neon-glow font-orbitron animate-fade-in">
+            Prompt Minds
+            </h1>
+            <p className="max-w-2xl mx-auto text-lg md:text-xl text-slate-400 mb-10 font-light tracking-wide">
+            Next-gen browser utilities. Secure, powerful, and lightning fast.
+            </p>
+            <div className="flex justify-center space-x-6">
+            <a href={`#${toSlug(toolCategories[0])}`} className="bg-cyan-600 text-white py-3 px-10 rounded-full font-bold uppercase tracking-wider transition-all duration-300 hover:bg-cyan-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:-translate-y-1">
+                Explore Hub
+            </a>
+            </div>
         </div>
       </section>
 
       {/* Tools Grid by Category */}
       {toolCategories.map(category => (
-        <section key={category} id={toSlug(category)} className="mb-16 scroll-mt-24">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 pb-2 border-b-2 border-blue-200">{category}</h2>
+        <section key={category} id={toSlug(category)} className="mb-20 scroll-mt-28">
+          <h2 className="text-3xl font-bold text-slate-200 mb-10 pl-4 border-l-4 border-cyan-500 font-orbitron tracking-wider">
+            {category}
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {toolsByCategory[category].map(tool => (
               <ToolCard key={tool.id} tool={tool} />
