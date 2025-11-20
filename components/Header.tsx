@@ -42,6 +42,7 @@ const Header: React.FC = () => {
               <a href={`#${toSlug(ToolCategory.IMAGE)}`} className={navLinkClasses}>Image Tools{navLinkUnderline}</a>
               <a href={`#${toSlug(ToolCategory.TEXT)}`} className={navLinkClasses}>Text Tools{navLinkUnderline}</a>
               <a href={`#${toSlug(ToolCategory.UTILITY)}`} className={navLinkClasses}>Utility Tools{navLinkUnderline}</a>
+              <a href="#" className={navLinkClasses}>About{navLinkUnderline}</a>
             </nav>
 
             {/* Mobile Menu Button */}
@@ -70,6 +71,7 @@ const Header: React.FC = () => {
             <a href={`#${toSlug(ToolCategory.IMAGE)}`} onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>Image Tools</a>
             <a href={`#${toSlug(ToolCategory.TEXT)}`} onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>Text Tools</a>
             <a href={`#${toSlug(ToolCategory.UTILITY)}`} onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>Utility Tools</a>
+            <a href="#" onClick={handleMobileLinkClick} className={mobileNavLinkClasses}>About</a>
           </nav>
       </div>
     </>
