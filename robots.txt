@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.promptminds.com/sitemap.xml
+Sitemap: https://www.magicpdf.online/sitemap.xml
