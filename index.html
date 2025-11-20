@@ -1,17 +1,19 @@
+
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prompt Minds – Multi Tool Hub</title>
+    <title>MagicPDF - Online PDF Tools</title>
+    <meta name="description" content="Merge, Split, Compress and Convert PDFs online for free. MagicPDF is your all-in-one tool for document management." />
     <meta name="google-adsense-account" content="ca-pub-5892615759191037">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5892615759191037"
      crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip/dist/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.1/mammoth.browser.min.js"></script>
@@ -25,47 +27,29 @@
       }
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #0f172a; /* Slate 900 */
-        color: #e2e8f0; /* Slate 200 */
-        background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
-        background-attachment: fixed;
-      }
-      h1, h2, h3, h4, h5, h6 {
-        font-family: 'Orbitron', sans-serif;
+        background-color: #f9fafb; /* Gray 50 */
+        color: #1f2937; /* Gray 800 */
       }
       .animate-fade-in {
-        animation: fadeIn 0.6s ease-out forwards;
+        animation: fadeIn 0.4s ease-out forwards;
       }
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px) scale(0.98); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
       .custom-scrollbar::-webkit-scrollbar {
         width: 8px;
         height: 8px;
       }
       .custom-scrollbar::-webkit-scrollbar-track {
-        background: #1e293b;
+        background: #f1f5f9;
       }
       .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #475569;
+        background-color: #cbd5e1;
         border-radius: 10px;
-        border: 2px solid #1e293b;
       }
       .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background-color: #06b6d4; /* Cyan 500 */
-      }
-      
-      /* Glassmorphism utilities */
-      .glass-panel {
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      
-      .neon-glow {
-        text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+        background-color: #94a3b8;
       }
     </style>
   <script type="importmap">

@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+
+import React, { useState, useRef } from 'react';
 import { Tool } from '../types';
 import { UploadIcon } from './icons/ToolIcons';
 
@@ -6,9 +7,6 @@ import { UploadIcon } from './icons/ToolIcons';
 declare const PDFLib: any;
 declare const JSZip: any;
 declare const pdfjsLib: any;
-declare const mammoth: any;
-declare const jspdf: any;
-declare const html2canvas: any;
 
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
@@ -18,21 +16,21 @@ interface ToolPageProps {
   tool: Tool;
 }
 
-// --- Reusable Styled Components for Dark Theme ---
+// --- Reusable Styled Components for Light Theme ---
 
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' }> = ({ children, variant = 'primary', className = '', ...props }) => {
-    const baseStyle = "py-3 px-4 rounded-lg font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm";
+    const baseStyle = "py-3 px-6 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm";
     let variantStyle = "";
     
     switch(variant) {
         case 'primary':
-            variantStyle = "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] border border-cyan-500/30";
+            variantStyle = "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md";
             break;
         case 'secondary':
-            variantStyle = "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-600";
+            variantStyle = "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:text-gray-900";
             break;
         case 'danger':
-            variantStyle = "bg-red-900/80 text-red-100 hover:bg-red-800 border border-red-700/50";
+            variantStyle = "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700";
             break;
     }
 
@@ -44,7 +42,7 @@ const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant
 };
 
 const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
-    <div className={`glass-panel p-6 rounded-xl border border-slate-700 bg-slate-800/50 ${className}`}>
+    <div className={`bg-white p-6 rounded-xl border border-gray-200 shadow-sm ${className}`}>
         {children}
     </div>
 );
@@ -52,27 +50,27 @@ const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ chi
 const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => (
     <input 
         {...props} 
-        className={`w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all ${props.className || ''}`} 
+        className={`w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${props.className || ''}`} 
     />
 );
 
 // --- Helper & Generic Components ---
 
-const ProcessingAnimation: React.FC<{ text?: string }> = ({ text = "Processing data..." }) => (
-    <div className="flex flex-col items-center justify-center gap-6 text-center py-10">
-        <div className="relative h-24 w-24">
-            <div className="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-t-cyan-500 rounded-full animate-spin shadow-[0_0_15px_rgba(6,182,212,0.5)]"></div>
+const ProcessingAnimation: React.FC<{ text?: string }> = ({ text = "Processing..." }) => (
+    <div className="flex flex-col items-center justify-center gap-6 text-center py-10 bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+        <div>
+            <p className="text-lg font-bold text-gray-800">{text}</p>
+            <p className="text-sm text-gray-500 mt-1">This usually takes a few seconds.</p>
         </div>
-        <p className="text-xl font-semibold text-cyan-400 font-orbitron animate-pulse">{text}</p>
-        <p className="text-sm text-slate-500">Please wait while the system computes.</p>
     </div>
 );
 
 const ComingSoon: React.FC = () => (
-    <Card className="text-center py-16">
-        <h3 className="text-3xl font-bold text-slate-400 mb-4 font-orbitron">System Offline</h3>
-        <p className="text-slate-500">This module is currently under development. Check back later.</p>
+    <Card className="text-center py-16 bg-gray-50">
+        <div className="text-4xl mb-4">🚧</div>
+        <h3 className="text-xl font-bold text-gray-700 mb-2">Coming Soon</h3>
+        <p className="text-gray-500">We are working hard to bring this tool to life.</p>
     </Card>
 );
 
@@ -128,7 +126,7 @@ const CompressPdfTool: React.FC = () => {
             });
         } catch (e) {
             console.error(e);
-            setError('Error: Compression failed. File may be encrypted.');
+            setError('Error: Compression failed. The file might be encrypted.');
         } finally {
             setIsProcessing(false);
         }
@@ -149,40 +147,45 @@ const CompressPdfTool: React.FC = () => {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    if (isProcessing) return <ProcessingAnimation text="Compressing PDF stream..." />;
+    if (isProcessing) return <ProcessingAnimation text="Optimizing PDF..." />;
 
     if (result) {
         return (
-            <div className="w-full flex flex-col gap-6 items-center text-center">
-                <p className="text-2xl font-bold text-green-400 font-orbitron">Optimization Successful</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full p-6 bg-slate-800/50 rounded-xl border border-slate-700">
-                    <div className="text-center">
-                        <p className="text-xs text-slate-500 uppercase tracking-wide">Original Size</p>
-                        <p className="font-bold text-xl text-slate-200 mt-1">{formatBytes(result.originalSize)}</p>
-                    </div>
-                    <div className="text-center">
-                        <p className="text-xs text-slate-500 uppercase tracking-wide">New Size</p>
-                        <p className="font-bold text-xl text-cyan-400 mt-1">{formatBytes(result.newSize)}</p>
-                    </div>
-                    <div className="text-center">
-                        <p className="text-xs text-slate-500 uppercase tracking-wide">Reduction</p>
-                        <p className="font-bold text-xl text-green-400 mt-1">
-                            {result.originalSize > 0 ? (((result.originalSize - result.newSize) / result.originalSize) * 100).toFixed(1) : 0}%
-                        </p>
-                    </div>
+            <div className="w-full flex flex-col gap-6 items-center text-center max-w-2xl mx-auto">
+                <div className="bg-green-50 text-green-800 px-6 py-3 rounded-full font-semibold text-sm border border-green-200 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    PDF Successfully Compressed
                 </div>
-                <Button onClick={() => downloadFile(result.compressedBytes, 'application/pdf', `${file?.name.replace('.pdf', '')}-compressed.pdf`)} className="w-full">
-                    Download Optimized PDF
+                <Card className="w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+                        <div className="text-center p-2">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Original</p>
+                            <p className="font-bold text-xl text-gray-800 mt-1">{formatBytes(result.originalSize)}</p>
+                        </div>
+                        <div className="text-center p-2">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Compressed</p>
+                            <p className="font-bold text-xl text-blue-600 mt-1">{formatBytes(result.newSize)}</p>
+                        </div>
+                        <div className="text-center p-2">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Savings</p>
+                            <p className="font-bold text-xl text-green-600 mt-1">
+                                {result.originalSize > 0 ? (((result.originalSize - result.newSize) / result.originalSize) * 100).toFixed(1) : 0}%
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+                <Button onClick={() => downloadFile(result.compressedBytes, 'application/pdf', `${file?.name.replace('.pdf', '')}-compressed.pdf`)} className="w-full text-lg">
+                    Download Compressed PDF
                 </Button>
-                <button onClick={handleReset} className="text-sm text-cyan-400 hover:text-cyan-300 hover:underline">
-                    Process another file
+                <button onClick={handleReset} className="text-sm text-gray-500 hover:text-blue-600 hover:underline">
+                    Compress another PDF
                 </button>
             </div>
         )
     }
 
     return (
-        <div className="w-full flex flex-col gap-6 text-center">
+        <div className="w-full flex flex-col gap-6 text-center max-w-2xl mx-auto">
             {!file ? (
                 <div
                     onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }}
@@ -190,25 +193,38 @@ const CompressPdfTool: React.FC = () => {
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-cyan-500 bg-cyan-900/20' : 'border-slate-700 hover:border-slate-500 hover:bg-slate-800/50'} rounded-xl p-12 transition-all duration-300 cursor-pointer text-center`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'} rounded-xl p-12 transition-all duration-200 cursor-pointer group`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
-                        <UploadIcon className={`w-16 h-16 mb-4 ${isDragOver ? 'text-cyan-400' : 'text-slate-600'}`} />
-                        <p className="text-slate-300 font-semibold text-lg">Drop PDF here to compress</p>
-                        <p className="text-slate-500 mt-2">or click to browse</p>
+                        <div className="p-4 rounded-full bg-blue-50 mb-4 group-hover:bg-blue-100 transition-colors">
+                            <UploadIcon className={`w-8 h-8 text-blue-600`} />
+                        </div>
+                        <p className="text-gray-900 font-bold text-xl mb-2">Select PDF file</p>
+                        <p className="text-gray-500">or drop PDF here</p>
                     </div>
                 </div>
             ) : (
                 <Card className="flex items-center justify-between">
-                    <span className="font-medium text-slate-200 truncate">{file.name}</span>
-                    <button onClick={handleReset} className="text-sm text-red-400 hover:text-red-300 ml-4">Remove</button>
+                    <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="bg-red-100 p-2 rounded text-red-600">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        </div>
+                        <span className="font-medium text-gray-700 truncate">{file.name}</span>
+                    </div>
+                    <button onClick={handleReset} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
                 </Card>
             )}
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm border border-red-200">
+                    {error}
+                </div>
+            )}
             {file && (
-                 <Button onClick={handleCompress} disabled={isProcessing} className="w-full">
-                    {isProcessing ? 'Compressing...' : `Compress PDF`}
+                 <Button onClick={handleCompress} disabled={isProcessing} className="w-full text-lg shadow-md">
+                    Compress PDF
                 </Button>
             )}
         </div>
@@ -310,10 +326,10 @@ const SplitPdfTool: React.FC = () => {
         return Array.from(result).sort((a, b) => a - b);
     };
 
-    if (isProcessing && !file) return <ProcessingAnimation text="Analyzing PDF structure..." />;
+    if (isProcessing && !file) return <ProcessingAnimation text="Analyzing PDF..." />;
 
     return (
-        <div className="w-full flex flex-col gap-6">
+        <div className="w-full flex flex-col gap-6 max-w-2xl mx-auto">
             {!file ? (
                  <div
                     onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }}
@@ -321,58 +337,61 @@ const SplitPdfTool: React.FC = () => {
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-cyan-500 bg-cyan-900/20' : 'border-slate-700 hover:border-slate-500 hover:bg-slate-800/50'} rounded-xl p-12 transition-all duration-300 cursor-pointer text-center`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'} rounded-xl p-12 transition-all duration-200 cursor-pointer group text-center`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
-                        <UploadIcon className={`w-16 h-16 mb-4 ${isDragOver ? 'text-cyan-400' : 'text-slate-600'}`} />
-                        <p className="text-slate-300 font-semibold text-lg">Drop PDF here to split</p>
-                         <p className="text-slate-500 mt-2">or click to browse</p>
+                        <div className="p-4 rounded-full bg-blue-50 mb-4 group-hover:bg-blue-100 transition-colors">
+                            <UploadIcon className={`w-8 h-8 text-blue-600`} />
+                        </div>
+                        <p className="text-gray-900 font-bold text-xl mb-2">Select PDF file</p>
+                        <p className="text-gray-500">or drop PDF here</p>
                     </div>
                 </div>
             ) : (
                 <>
-                    <Card className="text-center">
-                        <p className="font-semibold text-slate-200">{file.name} <span className="text-cyan-500 font-normal">({totalPages} pages)</span></p>
-                        <button onClick={() => { setFile(null); setTotalPages(0); }} className="text-sm text-cyan-400 hover:underline mt-2">
+                    <Card className="text-center border-blue-200 bg-blue-50/50">
+                         <div className="flex items-center justify-center gap-2 mb-2">
+                            <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <p className="font-semibold text-gray-800">{file.name}</p>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-3">{totalPages} Pages Detected</p>
+                        <button onClick={() => { setFile(null); setTotalPages(0); }} className="text-sm text-blue-600 hover:underline">
                             Change File
                         </button>
                     </Card>
 
-                    <div className="flex border border-slate-700 rounded-lg overflow-hidden bg-slate-800/50 p-1">
-                        <button onClick={() => setMode('extract')} className={`flex-1 p-2 font-semibold rounded-md transition-all ${mode === 'extract' ? 'bg-cyan-600 text-white shadow' : 'text-slate-400 hover:bg-slate-700 hover:text-white'}`}>Extract Pages</button>
-                        <button onClick={() => setMode('split')} className={`flex-1 p-2 font-semibold rounded-md transition-all ${mode === 'split' ? 'bg-cyan-600 text-white shadow' : 'text-slate-400 hover:bg-slate-700 hover:text-white'}`}>Split All</button>
+                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                        <button onClick={() => setMode('extract')} className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${mode === 'extract' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Extract Pages</button>
+                        <button onClick={() => setMode('split')} className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${mode === 'split' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Split All</button>
                     </div>
                     
                     {mode === 'extract' ? (
-                        <div className="flex flex-col">
-                            <label htmlFor="pageRange" className="text-sm font-medium text-slate-400 mb-2">Pages to extract (e.g., 1, 3-5)</label>
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="pageRange" className="text-sm font-bold text-gray-700">Pages to extract</label>
                             <Input
                                 id="pageRange"
                                 type="text"
                                 value={pageRange}
                                 onChange={(e) => setPageRange(e.target.value)}
-                                placeholder="e.g., 1, 3-5, 8"
+                                placeholder="Example: 1, 3-5, 8"
                             />
+                            <p className="text-xs text-gray-500">Enter page numbers or ranges separated by commas.</p>
                         </div>
                     ) : (
-                        <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-md text-center text-sm text-blue-300">
-                            This operation will generate a ZIP archive containing {totalPages} separate PDF files.
+                        <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg text-center text-sm text-blue-800">
+                            This will convert every page of this PDF into a separate file and download them as a ZIP archive.
                         </div>
                     )}
-                    <Button onClick={handleProcess} disabled={isProcessing} className="w-full text-lg">
-                        {isProcessing ? 'Processing...' : 'Execute Split'}
+                    <Button onClick={handleProcess} disabled={isProcessing} className="w-full text-lg shadow-md">
+                        {isProcessing ? 'Processing...' : 'Split PDF'}
                     </Button>
                 </>
             )}
-             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </div>
     );
 };
-
-// ... [Other tools would follow same pattern - updating styling to dark theme] ...
-// For brevity, I will implement the common tools container and wrap the ones implemented above.
-// I will ensure PdfToWord, WordToPdf, JpgToPdf etc. use the new styled components.
 
 const PdfToWordTool: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -409,7 +428,7 @@ const PdfToWordTool: React.FC = () => {
                 htmlBody += `<p>${strings.join(' ')}</p><br/>`;
             }
 
-            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Prompt Minds Conversion</title></head><body>`;
+            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>MagicPDF Conversion</title></head><body>`;
             const footer = "</body></html>";
             const sourceHTML = header + htmlBody + footer;
             
@@ -422,10 +441,10 @@ const PdfToWordTool: React.FC = () => {
         }
     };
 
-    if (isProcessing) return <ProcessingAnimation text="Converting to Word..." />;
+    if (isProcessing) return <ProcessingAnimation text="Converting..." />;
 
     return (
-        <div className="w-full flex flex-col gap-6 text-center">
+        <div className="w-full flex flex-col gap-6 text-center max-w-2xl mx-auto">
             {!file ? (
                 <div
                     onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }}
@@ -433,23 +452,26 @@ const PdfToWordTool: React.FC = () => {
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-cyan-500 bg-cyan-900/20' : 'border-slate-700 hover:border-slate-500 hover:bg-slate-800/50'} rounded-xl p-12 transition-all duration-300 cursor-pointer text-center`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'} rounded-xl p-12 transition-all duration-200 cursor-pointer group`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
-                        <UploadIcon className={`w-16 h-16 mb-4 ${isDragOver ? 'text-cyan-400' : 'text-slate-600'}`} />
-                        <p className="text-slate-300 font-semibold text-lg">Drop PDF to Convert</p>
+                        <div className="p-4 rounded-full bg-blue-50 mb-4 group-hover:bg-blue-100 transition-colors">
+                             <UploadIcon className={`w-8 h-8 text-blue-600`} />
+                        </div>
+                        <p className="text-gray-900 font-bold text-xl mb-2">Select PDF file</p>
+                        <p className="text-gray-500">or drop PDF here</p>
                     </div>
                 </div>
             ) : (
                 <Card className="flex items-center justify-between">
-                    <span className="font-medium text-slate-200 truncate">{file.name}</span>
-                    <button onClick={() => setFile(null)} className="text-sm text-red-400 hover:text-red-300 ml-4">Remove</button>
+                    <span className="font-medium text-gray-700 truncate">{file.name}</span>
+                    <button onClick={() => setFile(null)} className="text-sm text-red-500 hover:text-red-700 font-medium">Remove</button>
                 </Card>
             )}
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-            <Button onClick={handleConvert} disabled={!file} className="w-full">
-                Convert to Word (.doc)
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <Button onClick={handleConvert} disabled={!file} className="w-full text-lg shadow-md">
+                Convert to Word
             </Button>
         </div>
     );
@@ -459,32 +481,44 @@ const PdfToWordTool: React.FC = () => {
 const ToolPage: React.FC<ToolPageProps> = ({ tool }) => {
   const renderToolContent = () => {
     switch (tool.id) {
-      case 'merge-pdf': return <ComingSoon />; // Placeholder for full implementation
+      case 'merge-pdf': return <ComingSoon />; 
       case 'split-pdf': return <SplitPdfTool />;
       case 'compress-pdf': return <CompressPdfTool />;
       case 'pdf-to-word': return <PdfToWordTool />;
-      // ... other tools mapped to their components or ComingSoon
       default: return <ComingSoon />;
     }
   };
 
   return (
-    <div className="min-h-full p-4 sm:p-6 md:p-10 animate-fade-in">
+    <div className="min-h-full p-4 md:p-8 animate-fade-in">
         <div className="max-w-4xl mx-auto">
-            <header className="text-center mb-10">
-                <div className="inline-block p-5 bg-slate-800/50 border border-cyan-500/30 rounded-2xl mb-6 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-                    <tool.icon className="w-16 h-16 text-cyan-400" />
-                </div>
-                <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-400 font-orbitron tracking-wide uppercase">{tool.title}</h1>
-                <p className="max-w-2xl mx-auto mt-4 text-lg text-slate-400 font-light">{tool.description}</p>
+            <header className="text-center mb-8">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{tool.title}</h1>
+                <p className="max-w-2xl mx-auto text-lg text-gray-600">{tool.description}</p>
             </header>
-            <main className="glass-panel rounded-2xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
-                {/* Decorative elements */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
-                <div className="flex justify-center relative z-10">
-                    {renderToolContent()}
-                </div>
-            </main>
+            
+            {/* Main Interface Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-10 min-h-[400px] flex items-center justify-center">
+                {renderToolContent()}
+            </div>
+
+            {/* SEO Content Area - "Separate Page" feel */}
+            <div className="mt-12 prose prose-blue max-w-none text-gray-600">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">How to use {tool.title}</h2>
+                <ol className="list-decimal list-inside space-y-2 mb-8">
+                    <li>Select your file from the upload area above.</li>
+                    <li>Wait for the file to be processed securely in your browser.</li>
+                    <li>Adjust any settings if available for the specific tool.</li>
+                    <li>Click the action button to download your result.</li>
+                </ol>
+                
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Secure & Private</h2>
+                <p>
+                    MagicPDF operates differently from other online PDF tools. We don't upload your files to a remote server for processing. 
+                    Instead, we use advanced browser technologies to process your files directly on your device. This guarantees 
+                    that your documents never leave your computer and remain 100% private.
+                </p>
+            </div>
         </div>
     </div>
   );

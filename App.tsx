@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
@@ -15,10 +16,14 @@ const App: React.FC = () => {
     const handleHashChange = () => {
       const hash = window.location.hash;
       
+      // Reset title by default
+      document.title = "MagicPDF - Online PDF Tools";
+
       // Check for Privacy Policy route
       if (hash === '#/privacy') {
         setIsPrivacyView(true);
         setActiveToolId(null);
+        document.title = "Privacy Policy - MagicPDF";
         window.scrollTo(0, 0);
         return;
       }
@@ -31,6 +36,9 @@ const App: React.FC = () => {
         const tool = TOOLS.find(t => t.id === match[1]);
         if (tool) {
             setActiveToolId(match[1]);
+            // Update page title for SEO
+            document.title = `${tool.title} - MagicPDF`;
+            window.scrollTo(0, 0);
         } else {
             // If tool doesn't exist, go back to home
             window.location.hash = '#';
@@ -63,24 +71,18 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-900 text-slate-200 selection:bg-cyan-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 font-sans">
       <Header />
       <AdBanner placement="header" />
-      <div className="flex-1 flex w-full overflow-hidden relative z-10">
+      <div className="flex-1 flex w-full overflow-hidden relative z-10 max-w-7xl mx-auto">
         <AdBanner placement="left" />
-        <main className="flex-1 overflow-y-auto custom-scrollbar">
+        <main className="flex-1 overflow-y-auto custom-scrollbar w-full">
           {renderContent()}
         </main>
         <AdBanner placement="right" />
       </div>
       <AdBanner placement="footer" />
       <Footer />
-      
-      {/* Background Ambient Glow */}
-      <div className="fixed top-20 left-0 w-full h-full pointer-events-none z-0 overflow-hidden opacity-30">
-         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-cyan-600 blur-[120px]"></div>
-         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600 blur-[120px]"></div>
-      </div>
     </div>
   );
 };
