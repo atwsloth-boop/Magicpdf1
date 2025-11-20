@@ -1,195 +1,69 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic PDF – Ultimate AI & PDF Toolkit</title>
-    <meta name="description" content="Free, secure, client-side PDF tools. Merge, Split, Compress, Convert, Watermark, Unlock, and more. No file uploads - runs entirely in your browser.">
-    <meta name="author" content="Magic PDF">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://www.magicpdf.online/" />
-    
-    <!-- Google AdSense Code -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Magic PDF – All-in-one PDF Tools</title>
     <meta name="google-adsense-account" content="ca-pub-5892615759191037">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5892615759191037" crossorigin="anonymous"></script>
-
-    <!-- Tailwind CSS -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5892615759191037"
+     crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Shared CSS -->
-    <link rel="stylesheet" href="style.css">
-<script type="importmap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip/dist/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.1/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- pdf.js for rendering PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #ffffff;
+        color: #1f2937;
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #94a3b8;
+        border-radius: 10px;
+        border: 2px solid #f1f5f9;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #64748b;
+      }
+    </style>
+  <script type="importmap">
 {
   "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "qrcode.react": "https://aistudiocdn.com/qrcode.react@^4.2.0"
   }
 }
 </script>
 </head>
-<body class="antialiased">
-
-    <!-- Header -->
-    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800">
-        <div class="container mx-auto px-4 h-20 flex items-center justify-between">
-            <a href="index.html" class="flex items-center gap-3 group cursor-pointer">
-                <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:rotate-12 transition-transform">
-                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <span class="font-display font-bold text-xl tracking-wider text-white"><span class="text-cyan-400">MAGIC</span> PDF</span>
-            </a>
-            
-            <nav class="hidden md:flex items-center gap-8">
-                <a href="index.html" class="text-slate-300 hover:text-cyan-400 transition-colors text-sm font-medium uppercase tracking-wide">Hub</a>
-                <a href="#pdf-tools" class="text-slate-300 hover:text-cyan-400 transition-colors text-sm font-medium uppercase tracking-wide">PDF Tools</a>
-                <a href="#img-tools" class="text-slate-300 hover:text-cyan-400 transition-colors text-sm font-medium uppercase tracking-wide">Image Tools</a>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Top Ad Banner -->
-    <div class="container mx-auto px-4 mt-4">
-        <div class="ad-label">Advertisement</div>
-        <div class="ad-slot w-full h-24 rounded-lg">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-5892615759191037"
-                 data-ad-slot="1234567890"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
-    </div>
-
-    <!-- Main Layout -->
-    <div class="flex-1 container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8">
-        <!-- Sidebar -->
-        <aside class="hidden lg:block w-64 shrink-0">
-            <div class="sticky top-24 space-y-6">
-                <div class="glass-panel p-4 rounded-xl">
-                    <h3 class="font-display font-bold text-cyan-400 mb-4">Categories</h3>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#pdf-tools" class="block p-2 rounded hover:bg-white/5 text-slate-300 hover:text-white transition">PDF Tools</a></li>
-                        <li><a href="#img-tools" class="block p-2 rounded hover:bg-white/5 text-slate-300 hover:text-white transition">Image Processors</a></li>
-                        <li><a href="#utils" class="block p-2 rounded hover:bg-white/5 text-slate-300 hover:text-white transition">Utilities</a></li>
-                    </ul>
-                </div>
-                <div class="ad-slot h-[600px] rounded-xl">
-                     <div class="text-xs text-slate-600">Ad</div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1">
-            <section class="text-center py-12 relative overflow-hidden rounded-3xl glass-panel px-6 border border-cyan-500/20 mb-12">
-                <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-cyan-500/10 to-purple-500/10 z-0"></div>
-                <div class="relative z-10">
-                    <h1 class="text-4xl md:text-6xl font-display font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-cyan-400 drop-shadow-lg">
-                        MAGIC PDF
-                    </h1>
-                    <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-8">
-                        A futuristic suite of secure, client-side tools. Merge, Split, Convert, and Edit without uploading your files.
-                    </p>
-                </div>
-            </section>
-
-            <div id="pdf-tools" class="pt-4">
-                <h2 class="text-2xl font-display font-bold text-white mb-6 border-l-4 border-cyan-400 pl-4">PDF Utilities</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    <!-- PDF Cards -->
-                    <a href="merge-pdf.html" class="block glass-panel p-6 rounded-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group">
-                        <div class="p-3 w-fit rounded-lg bg-slate-800 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors mb-4">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 font-display">Merge PDF</h3>
-                        <p class="text-slate-400 text-sm">Combine multiple PDFs into one document.</p>
-                    </a>
-
-                    <a href="split-pdf.html" class="block glass-panel p-6 rounded-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group">
-                        <div class="p-3 w-fit rounded-lg bg-slate-800 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors mb-4">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m-4-4 4 4 4-4m0-16-4 4-4-4"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 font-display">Split PDF</h3>
-                        <p class="text-slate-400 text-sm">Extract pages or split a PDF file.</p>
-                    </a>
-
-                    <a href="compress-pdf.html" class="block glass-panel p-6 rounded-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group">
-                        <div class="p-3 w-fit rounded-lg bg-slate-800 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors mb-4">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-4 4m0-4l4 4M4 20h16"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 font-display">Compress PDF</h3>
-                        <p class="text-slate-400 text-sm">Reduce PDF file size significantly.</p>
-                    </a>
-
-                    <a href="word-to-pdf.html" class="block glass-panel p-6 rounded-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group">
-                        <div class="p-3 w-fit rounded-lg bg-slate-800 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors mb-4">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 font-display">Word to PDF</h3>
-                        <p class="text-slate-400 text-sm">Convert .docx files to PDF format.</p>
-                    </a>
-                    
-                    <a href="pdf-to-word.html" class="block glass-panel p-6 rounded-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group">
-                        <div class="p-3 w-fit rounded-lg bg-slate-800 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors mb-4">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 font-display">PDF to Word</h3>
-                        <p class="text-slate-400 text-sm">Convert PDF to editable Word (.doc).</p>
-                    </a>
-
-                    <a href="unlock-pdf.html" class="block glass-panel p-6 rounded-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group">
-                         <div class="p-3 w-fit rounded-lg bg-slate-800 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors mb-4">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 font-display">Unlock PDF</h3>
-                        <p class="text-slate-400 text-sm">Remove passwords from PDFs.</p>
-                    </a>
-                </div>
-            </div>
-
-            <div id="img-tools" class="pt-8">
-                <h2 class="text-2xl font-display font-bold text-white mb-6 border-l-4 border-purple-500 pl-4">Image Studio</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                     <a href="jpg-to-pdf.html" class="block glass-panel p-6 rounded-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group">
-                        <div class="p-3 w-fit rounded-lg bg-slate-800 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors mb-4">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 font-display">JPG to PDF</h3>
-                        <p class="text-slate-400 text-sm">Convert images to a single PDF.</p>
-                    </a>
-                     <a href="pdf-to-jpg.html" class="block glass-panel p-6 rounded-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group">
-                        <div class="p-3 w-fit rounded-lg bg-slate-800 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors mb-4">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 font-display">PDF to JPG</h3>
-                        <p class="text-slate-400 text-sm">Convert PDF pages to images.</p>
-                    </a>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Footer -->
-    <footer class="border-t border-slate-800 bg-black/50 mt-12">
-        <div class="container mx-auto px-4 py-8">
-             <div class="ad-label">Advertisement</div>
-            <div class="ad-slot w-full h-24 rounded-lg mb-8">
-                 <div class="text-slate-600 text-xs">Ad Space</div>
-            </div>
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="text-center md:text-left">
-                    <span class="font-display font-bold text-lg text-white">MAGIC PDF</span>
-                    <p class="text-slate-500 text-sm">© 2025 All Rights Reserved.</p>
-                </div>
-                <div class="flex gap-6 text-slate-400 text-sm">
-                    <a href="#" class="hover:text-cyan-400">Privacy Policy</a>
-                    <a href="#" class="hover:text-cyan-400">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-</body>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>
