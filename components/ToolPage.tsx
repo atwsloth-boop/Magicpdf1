@@ -7,6 +7,9 @@ import { UploadIcon } from './icons/ToolIcons';
 declare const PDFLib: any;
 declare const JSZip: any;
 declare const pdfjsLib: any;
+declare const mammoth: any;
+declare const html2canvas: any;
+declare const jspdf: any;
 
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
@@ -477,6 +480,140 @@ const PdfToWordTool: React.FC = () => {
     );
 };
 
+const WordToPdfTool: React.FC = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isDragOver, setIsDragOver] = useState(false);
+
+    const handleFileSelect = (selectedFile: File | null) => {
+        if (!selectedFile) return;
+        // Check extension
+        const allowedExtensions = ['.docx'];
+        const fileExtension = selectedFile.name.toLowerCase().substring(selectedFile.name.lastIndexOf('.'));
+        
+        if (!allowedExtensions.includes(fileExtension)) {
+            setError('Only .docx files are supported. Legacy .doc format cannot be converted in the browser.');
+            setFile(null);
+            return;
+        }
+        setFile(selectedFile);
+        setError(null);
+    };
+
+    const handleConvert = async () => {
+        if (!file) return;
+        setIsProcessing(true);
+        setError(null);
+        
+        try {
+             const arrayBuffer = await file.arrayBuffer();
+             const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
+             
+             // Create off-screen container with proper styling for capturing
+             const container = document.createElement('div');
+             container.style.width = '794px'; // Approx A4 width
+             container.style.padding = '48px';
+             container.style.background = 'white';
+             container.style.fontFamily = "Arial, Helvetica, sans-serif";
+             container.style.fontSize = "12pt";
+             container.style.lineHeight = "1.5";
+             container.style.color = "black";
+             container.innerHTML = html;
+             
+             // Mount to body to capture (off-screen)
+             container.style.position = 'absolute';
+             container.style.left = '-9999px';
+             container.style.top = '0';
+             document.body.appendChild(container);
+
+             const canvas = await html2canvas(container, { 
+                 scale: 2,
+                 useCORS: true
+             });
+             document.body.removeChild(container);
+
+             const { jsPDF } = jspdf;
+             const pdf = new jsPDF('p', 'mm', 'a4');
+             const imgData = canvas.toDataURL('image/jpeg', 0.95);
+             
+             const imgWidth = 210; // A4 width in mm
+             const pageHeight = 297; // A4 height in mm
+             const imgHeight = canvas.height * imgWidth / canvas.width;
+             
+             let heightLeft = imgHeight;
+             let position = 0;
+
+             pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+             heightLeft -= pageHeight;
+
+             while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+             }
+             
+             pdf.save(file.name.replace(/\.docx?$/i, '.pdf'));
+
+        } catch (err) {
+            console.error(err);
+            setError('Conversion failed. Please ensure the file is a valid .docx document.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    if (isProcessing) return <ProcessingAnimation text="Converting Word to PDF..." />;
+
+    return (
+        <div className="w-full flex flex-col gap-6 text-center max-w-2xl mx-auto">
+            {!file ? (
+                <div
+                    onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }}
+                    onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); }}
+                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files?.[0] || null); }}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'} rounded-xl p-12 transition-all duration-200 cursor-pointer group`}
+                >
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".docx" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
+                    <div className="flex flex-col items-center">
+                        <div className="p-4 rounded-full bg-blue-50 mb-4 group-hover:bg-blue-100 transition-colors">
+                            <UploadIcon className={`w-8 h-8 text-blue-600`} />
+                        </div>
+                        <p className="text-gray-900 font-bold text-xl mb-2">Select Word file</p>
+                        <p className="text-gray-500">or drop DOCX here</p>
+                    </div>
+                </div>
+            ) : (
+                <Card className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="bg-blue-100 p-2 rounded text-blue-600">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </div>
+                        <span className="font-medium text-gray-700 truncate">{file.name}</span>
+                    </div>
+                    <button onClick={() => setFile(null)} className="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </Card>
+            )}
+            {error && (
+                 <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm border border-red-200">
+                    {error}
+                </div>
+            )}
+            {file && (
+                <Button onClick={handleConvert} disabled={isProcessing} className="w-full text-lg shadow-md">
+                    Convert to PDF
+                </Button>
+            )}
+        </div>
+    );
+};
+
 // Main Tool Page Component
 const ToolPage: React.FC<ToolPageProps> = ({ tool }) => {
   const renderToolContent = () => {
@@ -485,6 +622,7 @@ const ToolPage: React.FC<ToolPageProps> = ({ tool }) => {
       case 'split-pdf': return <SplitPdfTool />;
       case 'compress-pdf': return <CompressPdfTool />;
       case 'pdf-to-word': return <PdfToWordTool />;
+      case 'word-to-pdf': return <WordToPdfTool />;
       default: return <ComingSoon />;
     }
   };
