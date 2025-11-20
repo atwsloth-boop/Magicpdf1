@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split PDF - Magic PDF</title>
+    <link rel="canonical" href="https://www.magicpdf.online/split-pdf.html" />
+    <meta name="google-adsense-account" content="ca-pub-5892615759191037">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5892615759191037" crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip/dist/jszip.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800">
+        <div class="container mx-auto px-4 h-20 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded flex items-center justify-center group-hover:rotate-12 transition-transform">
+                   <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <span class="font-display font-bold text-xl tracking-wider text-white"><span class="text-cyan-400">MAGIC</span> PDF</span>
+            </a>
+            <a href="index.html" class="text-slate-300 hover:text-white text-sm font-medium uppercase">Back to Hub</a>
+        </div>
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-8">
+        <div class="glass-panel rounded-2xl p-1 border-t border-cyan-500/30 max-w-4xl mx-auto">
+            <div class="bg-slate-900/80 rounded-xl p-6 md:p-8 min-h-[500px]">
+                <div class="flex items-center gap-4 mb-8 border-b border-slate-800 pb-6">
+                    <div class="p-3 bg-slate-800 rounded-lg text-cyan-400"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m-4-4 4 4 4-4m0-16-4 4-4-4"></path></svg></div>
+                    <div>
+                        <h1 class="text-2xl font-display font-bold text-white">Split PDF</h1>
+                        <p class="text-slate-400 text-sm">Extract pages or split a PDF file.</p>
+                    </div>
+                </div>
+                <div id="tool-workspace" class="w-full"></div>
+            </div>
+        </div>
+    </main>
+    <footer class="border-t border-slate-800 bg-black/50 mt-12 py-8 text-center text-slate-500 text-sm">
+        <div class="container mx-auto">© 2025 Magic PDF. All Rights Reserved.</div>
+    </footer>
+    <script src="app.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', () => initTool('split-pdf'));</script>
+</body>
+</html>
