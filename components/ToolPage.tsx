@@ -7,7 +7,7 @@ import { UploadIcon } from './icons/ToolIcons';
 declare const PDFLib: any;
 declare const JSZip: any;
 declare const pdfjsLib: any;
-declare const mammoth: any;
+declare const docx: any; // docx-preview library
 declare const html2canvas: any;
 declare const jspdf: any;
 
@@ -509,50 +509,66 @@ const WordToPdfTool: React.FC = () => {
         
         try {
              const arrayBuffer = await file.arrayBuffer();
-             const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
-             
-             // Create off-screen container with proper styling for capturing
+             const blob = new Blob([arrayBuffer], { type: file.type });
+
+             // Create a temporary hidden container for rendering the DOCX
              const container = document.createElement('div');
-             container.style.width = '794px'; // Approx A4 width
-             container.style.padding = '48px';
-             container.style.background = 'white';
-             container.style.fontFamily = "Arial, Helvetica, sans-serif";
-             container.style.fontSize = "12pt";
-             container.style.lineHeight = "1.5";
-             container.style.color = "black";
-             container.innerHTML = html;
-             
-             // Mount to body to capture (off-screen)
+             // Position off-screen but keep it "visible" for html2canvas
              container.style.position = 'absolute';
              container.style.left = '-9999px';
              container.style.top = '0';
+             // Set a fixed standard width for A4 simulation (approx 794px at 96DPI)
+             // docx-preview uses this to determine line breaks
+             container.style.width = '800px'; 
+             container.style.backgroundColor = '#ffffff';
              document.body.appendChild(container);
 
-             const canvas = await html2canvas(container, { 
-                 scale: 2,
-                 useCORS: true
+             // Render using docx-preview
+             // inWrapper: false renders just the document content without the viewer UI gray background
+             await (window as any).docx.renderAsync(blob, container, null, {
+                 inWrapper: false, 
+                 ignoreWidth: false,
+                 experimental: true
              });
+
+             // Capture the rendered content as a canvas
+             const canvas = await html2canvas(container, { 
+                 scale: 2, // Increase scale for better PDF resolution
+                 useCORS: true,
+                 backgroundColor: '#ffffff'
+             });
+             
+             // Clean up DOM
              document.body.removeChild(container);
 
+             // Convert Canvas to PDF
              const { jsPDF } = jspdf;
              const pdf = new jsPDF('p', 'mm', 'a4');
              const imgData = canvas.toDataURL('image/jpeg', 0.95);
              
-             const imgWidth = 210; // A4 width in mm
-             const pageHeight = 297; // A4 height in mm
-             const imgHeight = canvas.height * imgWidth / canvas.width;
+             const pdfWidth = 210; // A4 width in mm
+             const pdfHeight = 297; // A4 height in mm
+             
+             // Calculate image height while maintaining aspect ratio
+             const imgHeight = (canvas.height * pdfWidth) / canvas.width;
              
              let heightLeft = imgHeight;
              let position = 0;
 
-             pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-             heightLeft -= pageHeight;
+             // Add the first page
+             pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
+             heightLeft -= pdfHeight;
 
+             // Loop to split the long canvas into multiple PDF pages
              while (heightLeft > 0) {
-                position = heightLeft - imgHeight;
+                position = heightLeft - imgHeight; // This logic places the "rest" of the image for next page
+                // Correction: position needs to shift up by one page height relative to previous loop
+                // Correct logic for standard scrolling PDF generation:
+                position = -(pdfHeight * Math.ceil((imgHeight - heightLeft) / pdfHeight));
+                
                 pdf.addPage();
-                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+                pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pdfHeight;
              }
              
              pdf.save(file.name.replace(/\.docx?$/i, '.pdf'));
@@ -565,7 +581,7 @@ const WordToPdfTool: React.FC = () => {
         }
     };
 
-    if (isProcessing) return <ProcessingAnimation text="Converting Word to PDF..." />;
+    if (isProcessing) return <ProcessingAnimation text="Rendering Document & Generating PDF..." />;
 
     return (
         <div className="w-full flex flex-col gap-6 text-center max-w-2xl mx-auto">
@@ -605,6 +621,9 @@ const WordToPdfTool: React.FC = () => {
                     {error}
                 </div>
             )}
+            <div className="text-xs text-gray-500 bg-yellow-50 border border-yellow-100 p-2 rounded">
+                Note: This tool preserves images, tables, and advanced formatting by visually rendering your document.
+            </div>
             {file && (
                 <Button onClick={handleConvert} disabled={isProcessing} className="w-full text-lg shadow-md">
                     Convert to PDF
