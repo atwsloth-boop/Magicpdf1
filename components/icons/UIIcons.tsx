@@ -2,26 +2,24 @@
 import React from 'react';
 
 export const LogoIcon: React.FC<{ className?: string }> = (props) => (
-    <svg {...props} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#818cf8"/>
-                <stop offset="100%" stopColor="#4f46e5"/>
-            </linearGradient>
-        </defs>
-        {/* Document outline */}
-        <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        {/* Page fold */}
-        <path d="M14 2V8H20" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-
-        {/* Magic Wand */}
-        <path d="M9.5 12.5L14.5 17.5" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M8 14L10 12" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
-        
-        {/* Sparkles */}
-        <path d="M15 11L16 10" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M17 13L18 12" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M13 15L14 14" stroke="url(#logo-gradient)" strokeWidth="1.5" strokeLinecap="round"/>
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" >
+      <defs>
+        <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{ stopColor: 'rgb(59, 130, 246)', stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: 'rgb(29, 78, 216)', stopOpacity: 1 }} />
+        </linearGradient>
+      </defs>
+      {/* Document shape */}
+      <path stroke="url(#logo-gradient)" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline stroke="url(#logo-gradient)" points="14 2 14 8 20 8" />
+      
+      {/* Sparkle inside */}
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M12 12v6" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M9 15h6" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M10.5 13.5 9 12" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M13.5 13.5 15 12" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M10.5 16.5 9 18" />
+      <path stroke="url(#logo-gradient)" strokeLinecap="round" strokeLinejoin="round" d="M13.5 16.5 15 18" />
     </svg>
 );
 

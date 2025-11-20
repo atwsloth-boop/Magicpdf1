@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Tool } from '../types';
 import { CloseIcon } from './icons/UIIcons';
@@ -101,7 +100,7 @@ const FileDropZone: React.FC = () => {
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
-                className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300`}
+                className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300`}
             >
                 <input type="file" id="file-upload" className="hidden" multiple onChange={handleFileChange} />
                 <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
@@ -121,14 +120,14 @@ const FileDropZone: React.FC = () => {
             <button
                 onClick={simulateProcessing}
                 disabled={files.length === 0 || status !== 'idle'}
-                className="mt-6 w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-6 w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 Process Files
             </button>
             {status !== 'idle' && (
                 <div className="mt-4 p-3 bg-gray-100 rounded-md">
                     {status === 'uploading' && <p className="text-yellow-600">Uploading...</p>}
-                    {status === 'processing' && <p className="text-indigo-600">Processing...</p>}
+                    {status === 'processing' && <p className="text-blue-600">Processing...</p>}
                     {status === 'done' && <p className="text-green-600">Done! Your download will start shortly (simulation).</p>}
                 </div>
             )}
@@ -142,8 +141,8 @@ const FileDropZone: React.FC = () => {
 const ProcessingAnimation: React.FC = () => (
     <div className="flex flex-col items-center justify-center gap-4 text-center">
         <div className="relative h-24 w-24">
-            <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-t-indigo-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-t-blue-600 rounded-full animate-spin"></div>
         </div>
         <p className="text-lg font-semibold text-gray-700">Processing your documents...</p>
         <p className="text-sm text-gray-500">Please wait a moment.</p>
@@ -236,14 +235,14 @@ const MergePdfTool: React.FC = () => {
             onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
             onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); handleFileSelect(e.dataTransfer.files); }}
             onClick={() => fileInputRef.current?.click()}
-            className={`w-full relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
+            className={`w-full relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-10 transition-all duration-300 cursor-pointer text-center`}
         >
             <input type="file" ref={fileInputRef} className="hidden" multiple accept=".pdf" onChange={(e) => handleFileSelect(e.target.files)} />
             <div className="flex flex-col items-center">
                 <UploadIcon className="w-12 h-12 text-gray-400 mb-4" />
                 <p className="text-gray-700 font-semibold">Drag & drop PDF files here</p>
                 <p className="text-gray-500">or</p>
-                <span className="mt-2 bg-indigo-600 text-white py-2 px-4 rounded-md font-bold">
+                <span className="mt-2 bg-blue-600 text-white py-2 px-4 rounded-md font-bold">
                     Select Files
                 </span>
             </div>
@@ -260,8 +259,8 @@ const MergePdfTool: React.FC = () => {
                         <li key={i} className="flex items-center justify-between p-2 bg-white rounded border border-gray-200 shadow-sm">
                             <span className="text-sm text-gray-700 truncate pr-2">{i+1}. {file.name}</span>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                                <button onClick={() => moveFile(i, 'up')} disabled={i === 0} className="p-1 text-gray-500 hover:text-indigo-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg></button>
-                                <button onClick={() => moveFile(i, 'down')} disabled={i === files.length - 1} className="p-1 text-gray-500 hover:text-indigo-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>
+                                <button onClick={() => moveFile(i, 'up')} disabled={i === 0} className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg></button>
+                                <button onClick={() => moveFile(i, 'down')} disabled={i === files.length - 1} className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg></button>
                                 <button onClick={() => removeFile(i)} className="p-1 text-red-500 hover:text-red-700"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                             </div>
                         </li>
@@ -271,7 +270,7 @@ const MergePdfTool: React.FC = () => {
              <button onClick={() => fileInputRef.current?.click()} className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-gray-300">
                 Add More Files
             </button>
-            <button onClick={handleMerge} disabled={files.length < 2} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button onClick={handleMerge} disabled={files.length < 2} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
                 Merge PDFs
             </button>
         </div>
@@ -291,7 +290,7 @@ const MergePdfTool: React.FC = () => {
                 Download Merged PDF
             </a>
             <p className="text-sm text-gray-500">Thank you for using Magic PDF!</p>
-            <button onClick={handleReset} className="text-sm text-indigo-600 hover:underline">
+            <button onClick={handleReset} className="text-sm text-blue-600 hover:underline">
                 Start Over
             </button>
         </div>
@@ -410,7 +409,7 @@ const SplitPdfTool: React.FC = () => {
     return (
         <div className="w-full flex flex-col gap-4">
             {!file ? (
-                 <div onClick={() => fileInputRef.current?.click()} className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 transition-all duration-300 cursor-pointer hover:border-indigo-500 hover:bg-indigo-50">
+                 <div onClick={() => fileInputRef.current?.click()} className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 transition-all duration-300 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
                     <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
                         <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
@@ -426,8 +425,8 @@ const SplitPdfTool: React.FC = () => {
             {file && (
                 <>
                     <div className="flex border border-gray-300 rounded-md overflow-hidden">
-                        <button onClick={() => setMode('extract')} className={`flex-1 p-3 font-semibold ${mode === 'extract' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>Extract Pages</button>
-                        <button onClick={() => setMode('split')} className={`flex-1 p-3 font-semibold ${mode === 'split' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>Split to Separate Pages</button>
+                        <button onClick={() => setMode('extract')} className={`flex-1 p-3 font-semibold ${mode === 'extract' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>Extract Pages</button>
+                        <button onClick={() => setMode('split')} className={`flex-1 p-3 font-semibold ${mode === 'split' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>Split to Separate Pages</button>
                     </div>
                     {mode === 'extract' && (
                         <input
@@ -435,10 +434,10 @@ const SplitPdfTool: React.FC = () => {
                             value={pageRange}
                             onChange={(e) => setPageRange(e.target.value)}
                             placeholder="e.g., 1, 3-5, 8"
-                            className="w-full bg-white border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="w-full bg-white border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                     )}
-                    <button onClick={handleProcess} disabled={isProcessing} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50">
+                    <button onClick={handleProcess} disabled={isProcessing} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
                         {isProcessing ? 'Processing...' : 'Split PDF'}
                     </button>
                 </>
@@ -518,7 +517,7 @@ const CompressPdfTool: React.FC = () => {
     return (
         <div className="w-full flex flex-col gap-4 text-center">
             {!file && !result && (
-                <div onClick={() => fileInputRef.current?.click()} className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 transition-all duration-300 cursor-pointer hover:border-indigo-500 hover:bg-indigo-50">
+                <div onClick={() => fileInputRef.current?.click()} className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 transition-all duration-300 cursor-pointer hover:border-blue-500 hover:bg-blue-50">
                     <input type="file" ref={fileInputRef} className="hidden" accept=".pdf" onChange={e => handleFileSelect(e.target.files?.[0] || null)} />
                     <div className="flex flex-col items-center">
                         <UploadIcon className="w-10 h-10 text-gray-400 mb-3" />
@@ -528,7 +527,7 @@ const CompressPdfTool: React.FC = () => {
             )}
             {error && <p className="text-red-500 text-sm">{error}</p>}
             {file && !result && (
-                 <button onClick={handleCompress} disabled={isProcessing} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50">
+                 <button onClick={handleCompress} disabled={isProcessing} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50">
                     {isProcessing ? 'Compressing...' : `Compress ${file.name}`}
                 </button>
             )}
@@ -542,7 +541,7 @@ const CompressPdfTool: React.FC = () => {
                         </div>
                         <div>
                             <p className="text-sm text-gray-500">New Size</p>
-                            <p className="font-bold text-lg text-indigo-600">{formatBytes(result.newSize)}</p>
+                            <p className="font-bold text-lg text-blue-600">{formatBytes(result.newSize)}</p>
                         </div>
                          <div>
                             <p className="text-sm text-gray-500">Reduction</p>
@@ -552,7 +551,7 @@ const CompressPdfTool: React.FC = () => {
                         </div>
                     </div>
                     <button onClick={downloadFile} className="w-full bg-green-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-green-700">Download Compressed PDF</button>
-                    <button onClick={() => { setFile(null); setResult(null); }} className="text-sm text-indigo-600 hover:underline">Compress another file</button>
+                    <button onClick={() => { setFile(null); setResult(null); }} className="text-sm text-blue-600 hover:underline">Compress another file</button>
                 </div>
             )}
         </div>
@@ -687,7 +686,7 @@ const WordToPdfTool: React.FC = () => {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={onDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed ${isDragOver ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'} rounded-lg p-8 transition-all duration-300 cursor-pointer`}
+                    className={`relative border-2 border-dashed ${isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} rounded-lg p-8 transition-all duration-300 cursor-pointer`}
                 >
                     <input type="file" ref={fileInputRef} className="hidden" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={onFileChange} />
                     <div className="flex flex-col items-center">
@@ -712,7 +711,7 @@ const WordToPdfTool: React.FC = () => {
             <button
                 onClick={handleConvert}
                 disabled={!file || isConverting}
-                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isConverting ? 'Converting...' : 'Convert to PDF'}
             </button>
@@ -730,7 +729,7 @@ const QRGenerator: React.FC = () => {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Enter URL or text"
-                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
             <div className="p-4 bg-white rounded-md border border-gray-200 shadow-sm">
                 <QRCodeSVG value={text} size={256} />
@@ -750,7 +749,7 @@ const WordCounter: React.FC = () => {
                 onChange={(e) => setText(e.target.value)}
                 rows={8}
                 placeholder="Paste your text here..."
-                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none custom-scrollbar"
+                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none custom-scrollbar"
             />
             <div className="flex justify-around p-3 bg-gray-100 border border-gray-200 rounded-md">
                 <div className="text-center">
@@ -786,12 +785,12 @@ const TextToSpeech: React.FC = () => {
                 onChange={(e) => setText(e.target.value)}
                 rows={6}
                 placeholder="Enter text to speak..."
-                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none custom-scrollbar"
+                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none custom-scrollbar"
             />
             <button
                 onClick={handleSpeak}
                 disabled={!text.trim()}
-                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700 disabled:opacity-50"
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700 disabled:opacity-50"
             >
                 Speak
             </button>
@@ -851,7 +850,7 @@ const SpeechToText: React.FC = () => {
             <button
                 onClick={handleToggleListen}
                 className={`w-full py-3 px-4 rounded-md font-bold text-white transition-all duration-300 ${
-                    isListening ? 'bg-red-600 hover:bg-red-700' : 'bg-indigo-600 hover:bg-indigo-700'
+                    isListening ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
                 }`}
             >
                 {isListening ? 'Stop Listening' : 'Start Listening'}
@@ -861,7 +860,7 @@ const SpeechToText: React.FC = () => {
                 readOnly
                 rows={8}
                 placeholder="Your transcribed text will appear here..."
-                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none custom-scrollbar"
+                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none custom-scrollbar"
             />
         </div>
     );
@@ -923,24 +922,24 @@ const PasswordGenerator: React.FC = () => {
             <div className="space-y-4 text-gray-700">
                 <div className="flex items-center justify-between">
                     <label htmlFor="length">Password Length</label>
-                    <span className="font-bold text-indigo-600">{length}</span>
+                    <span className="font-bold text-blue-600">{length}</span>
                 </div>
-                <input type="range" id="length" min="6" max="32" value={length} onChange={(e) => setLength(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                <input type="range" id="length" min="6" max="32" value={length} onChange={(e) => setLength(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                 
                 <div className="flex items-center">
-                    <input type="checkbox" id="uppercase" checked={includeUppercase} onChange={() => setIncludeUppercase(p => !p)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <input type="checkbox" id="uppercase" checked={includeUppercase} onChange={() => setIncludeUppercase(p => !p)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                     <label htmlFor="uppercase" className="ml-2 block text-sm">Include Uppercase Letters</label>
                 </div>
                 <div className="flex items-center">
-                    <input type="checkbox" id="numbers" checked={includeNumbers} onChange={() => setIncludeNumbers(p => !p)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
+                    <input type="checkbox" id="numbers" checked={includeNumbers} onChange={() => setIncludeNumbers(p => !p)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
                     <label htmlFor="numbers" className="ml-2 block text-sm">Include Numbers</label>
                 </div>
                 <div className="flex items-center">
-                    <input type="checkbox" id="symbols" checked={includeSymbols} onChange={() => setIncludeSymbols(p => !p)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
+                    <input type="checkbox" id="symbols" checked={includeSymbols} onChange={() => setIncludeSymbols(p => !p)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
                     <label htmlFor="symbols" className="ml-2 block text-sm">Include Symbols</label>
                 </div>
             </div>
-             <button onClick={generatePassword} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700">
+             <button onClick={generatePassword} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700">
                 Generate New Password
             </button>
         </div>
@@ -986,9 +985,9 @@ const AgeCalculator: React.FC = () => {
                 type="date" 
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
-            <button onClick={calculateAge} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700">
+            <button onClick={calculateAge} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700">
                 Calculate Age
             </button>
             {age && (
@@ -1037,17 +1036,17 @@ const BMICalculator: React.FC = () => {
     return (
         <div className="w-full flex flex-col items-center gap-4">
             <div className="w-full space-y-4">
-                <input type="number" value={height} onChange={e => setHeight(e.target.value)} placeholder="Height (cm)" className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"/>
-                <input type="number" value={weight} onChange={e => setWeight(e.target.value)} placeholder="Weight (kg)" className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"/>
+                <input type="number" value={height} onChange={e => setHeight(e.target.value)} placeholder="Height (cm)" className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"/>
+                <input type="number" value={weight} onChange={e => setWeight(e.target.value)} placeholder="Weight (kg)" className="w-full bg-gray-50 border border-gray-300 rounded-md p-3 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"/>
             </div>
-            <button onClick={calculateBmi} className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-indigo-700">
+            <button onClick={calculateBmi} className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold transition-all duration-300 hover:bg-blue-700">
                 Calculate BMI
             </button>
             {bmi && (
                 <div className="text-center p-4 bg-gray-100 border border-gray-200 rounded-md w-full">
                     <p className="text-sm text-gray-500">Your BMI is</p>
                     <p className="text-4xl font-bold text-gray-800">{bmi.toFixed(1)}</p>
-                    <p className="font-semibold text-indigo-600 mt-1">{bmiCategory}</p>
+                    <p className="font-semibold text-blue-600 mt-1">{bmiCategory}</p>
                 </div>
             )}
         </div>
@@ -1092,7 +1091,7 @@ const ToolModal: React.FC<ToolModalProps> = ({ tool, onClose }) => {
             <div className="bg-white border border-gray-200 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-fade-in">
                 <header className="flex items-center justify-between p-4 border-b border-gray-200">
                     <div className="flex items-center gap-3">
-                        <tool.icon className="w-6 h-6 text-indigo-600" />
+                        <tool.icon className="w-6 h-6 text-blue-600" />
                         <h2 className="text-xl font-bold text-gray-800">{tool.title}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors">
