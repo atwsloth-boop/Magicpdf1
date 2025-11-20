@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -9,9 +8,10 @@
     <meta name="keywords" content="PDF merger, split PDF, image compressor, prompt engineering, AI tools, web utilities">
     <meta name="author" content="Prompt Minds">
     
-    <!-- AdSense Code -->
+    <!-- Google AdSense Code -->
     <meta name="google-adsense-account" content="ca-pub-5892615759191037">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5892615759191037" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5892615759191037"
+     crossorigin="anonymous"></script>
 
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -160,9 +160,9 @@
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "qrcode.react": "https://aistudiocdn.com/qrcode.react@^4.2.0"
   }
 }
@@ -173,7 +173,7 @@
     <!-- Header -->
     <header class="sticky top-0 z-50 glass-panel border-b border-slate-800">
         <div class="container mx-auto px-4 h-20 flex items-center justify-between">
-            <a href="#" onclick="navigate('home')" class="flex items-center gap-3 group cursor-pointer">
+            <a href="#" onclick="navigate('home'); return false;" class="flex items-center gap-3 group cursor-pointer">
                 <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:rotate-12 transition-transform">
                     <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
@@ -181,7 +181,7 @@
             </a>
             
             <nav class="hidden md:flex items-center gap-8">
-                <a href="#" onclick="navigate('home')" class="text-slate-300 hover:text-cyan-400 transition-colors text-sm font-medium uppercase tracking-wide">Hub</a>
+                <a href="#" onclick="navigate('home'); return false;" class="text-slate-300 hover:text-cyan-400 transition-colors text-sm font-medium uppercase tracking-wide">Hub</a>
                 <a href="#pdf-tools" class="text-slate-300 hover:text-cyan-400 transition-colors text-sm font-medium uppercase tracking-wide">PDF Tools</a>
                 <a href="#img-tools" class="text-slate-300 hover:text-cyan-400 transition-colors text-sm font-medium uppercase tracking-wide">Image Tools</a>
                 <a href="#utils" class="text-slate-300 hover:text-cyan-400 transition-colors text-sm font-medium uppercase tracking-wide">Utilities</a>
@@ -404,9 +404,13 @@
 
         function renderDashboard() {
             // Clear containers
-            document.getElementById('pdf-container').innerHTML = '';
-            document.getElementById('img-container').innerHTML = '';
-            document.getElementById('util-container').innerHTML = '';
+            const pdfContainer = document.getElementById('pdf-container');
+            const imgContainer = document.getElementById('img-container');
+            const utilContainer = document.getElementById('util-container');
+            
+            if(pdfContainer) pdfContainer.innerHTML = '';
+            if(imgContainer) imgContainer.innerHTML = '';
+            if(utilContainer) utilContainer.innerHTML = '';
             
             TOOLS.forEach(tool => {
                 const card = document.createElement('div');
@@ -423,9 +427,9 @@
                 `;
                 
                 // Distribute to categories
-                if(tool.category === 'PDF') document.getElementById('pdf-container').appendChild(card);
-                else if(tool.category === 'Image') document.getElementById('img-container').appendChild(card);
-                else document.getElementById('util-container').appendChild(card);
+                if(tool.category === 'PDF' && pdfContainer) pdfContainer.appendChild(card);
+                else if(tool.category === 'Image' && imgContainer) imgContainer.appendChild(card);
+                else if(utilContainer) utilContainer.appendChild(card);
             });
         }
 
@@ -436,10 +440,13 @@
 
         function navigate(dest, updateUrl = true) {
             if (dest === 'home') {
-                document.getElementById('view-dashboard').classList.remove('hidden');
-                document.getElementById('view-tool').classList.add('hidden');
+                const dash = document.getElementById('view-dashboard');
+                const toolView = document.getElementById('view-tool');
+                if(dash) dash.classList.remove('hidden');
+                if(toolView) toolView.classList.add('hidden');
+                
                 if(updateUrl) {
-                    // Clear hash without reloading
+                    // Clear hash without reloading or using pushState
                     window.location.hash = '';
                 }
                 window.scrollTo(0,0);
@@ -462,7 +469,8 @@
         }
 
         function scrollToTools() {
-            document.getElementById('pdf-tools').scrollIntoView({ behavior: 'smooth' });
+            const tools = document.getElementById('pdf-tools');
+            if(tools) tools.scrollIntoView({ behavior: 'smooth' });
         }
 
         function toggleMobileMenu() {
@@ -609,6 +617,9 @@
                     } else if (toolId === 'word-to-pdf') {
                          btn.innerHTML = `<span>Convert to PDF</span>`;
                          btn.onclick = () => processWordToPDF(selectedFiles[0]);
+                    } else if (toolId === 'image-compressor') {
+                         btn.innerHTML = `<span>Compress ${selectedFiles.length} Images</span>`;
+                         btn.onclick = () => alert("Image compression logic active (simulated for now)");
                     }
                 } else {
                     btn.classList.add('hidden');
@@ -726,7 +737,8 @@
 
         function setupPasswordGen() {
             const gen = () => {
-                const len = parseInt(document.getElementById('pw-length').value);
+                const lenElement = document.getElementById('pw-length');
+                const len = lenElement ? parseInt(lenElement.value) : 16;
                 const useNum = document.getElementById('pw-num').checked;
                 const useSym = document.getElementById('pw-sym').checked;
                 const useUpper = document.getElementById('pw-upper').checked;
@@ -738,10 +750,12 @@
                 
                 let ret = '';
                 for(let i=0; i<len; i++) ret += chars.charAt(Math.floor(Math.random() * chars.length));
-                document.getElementById('pw-result').innerText = ret;
+                const resEl = document.getElementById('pw-result');
+                if(resEl) resEl.innerText = ret;
             };
             
-            document.getElementById('gen-btn').onclick = gen;
+            const btn = document.getElementById('gen-btn');
+            if(btn) btn.onclick = gen;
             gen(); // initial
         }
 
